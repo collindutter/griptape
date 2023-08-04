@@ -28,9 +28,9 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
             return prompt
         raise ValueError("unknown model type")
 
-    def _build_model_parameters(self) -> any:
+    def _build_model_parameters(self, prompt: str) -> any:
         parameters = {
-            "max_new_tokens": self.tokenizer.tokens_left(),
+            "max_new_tokens": self.tokenizer.tokens_left(prompt),
             "temperature": self.temperature,
         }
         if self.model.startswith("falcon"):
@@ -55,7 +55,7 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
     def try_run(self, value: str) -> TextArtifact:
         payload = {
             "inputs": self._build_model_input(value),
-            "parameters": self._build_model_parameters(),
+            "parameters": self._build_model_parameters(value),
         }
         response = self.sagemaker_client.invoke_endpoint(
             EndpointName=self.endpoint_name,
