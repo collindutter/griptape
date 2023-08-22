@@ -21,9 +21,21 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
     def _build_model_input(self, prompt_stack: PromptStack) -> any:
         if self.model.startswith("llama"):
             return [
-                {"role": prompt_line.role, "content": prompt_line.content}
-                for prompt_line in prompt_stack.inputs
+                [
+                    {"role": prompt_line.role, "content": prompt_line.content}
+                    for prompt_line in prompt_stack.inputs
+                ]
             ]
+        elif self.model.startswith("falcon"):
+            return self.default_prompt_stack_to_string_converter(prompt_stack)
+        raise ValueError("unknown model type")
+
+    def default_prompt_stack_to_string_converter(
+        self, prompt_stack: PromptStack
+    ) -> str:
+        if self.model.startswith("llama"):
+            # TODO replace with proper llama prompt builder
+            return super().default_prompt_stack_to_string_converter(prompt_stack)
         elif self.model.startswith("falcon"):
             # https://huggingface.co/tiiuae/falcon-7b-instruct/discussions/1
             prompt_lines = []
@@ -43,12 +55,18 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
             return prompt
         raise ValueError("unknown model type")
 
-    def _build_model_parameters(self, prompt: str) -> any:
+    def _build_model_parameters(self, prompt_stack: PromptStack) -> any:
         parameters = {
-            "max_new_tokens": self.tokenizer.tokens_left(prompt),
+            "max_tokens": self.tokenizer.tokens_left(
+                self.default_prompt_stack_to_string_converter(prompt_stack)
+            ),
             "temperature": self.temperature,
         }
+
         if self.model.startswith("falcon"):
+            parameters["max_tokens"] = self.tokenizer.tokens_left(
+                self.default_prompt_stack_to_string_converter(prompt_stack)
+            )
             parameters["stop"] = self.tokenizer.stop_sequences
         return parameters
 
