@@ -57,7 +57,7 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
 
     def _build_model_parameters(self, prompt_stack: PromptStack) -> any:
         parameters = {
-            "max_tokens": self.tokenizer.tokens_left(
+            "max_new_tokens": self.tokenizer.tokens_left(
                 self.default_prompt_stack_to_string_converter(prompt_stack)
             ),
             "temperature": self.temperature,
