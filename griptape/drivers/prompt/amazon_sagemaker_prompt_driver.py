@@ -21,8 +21,10 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
     def _build_model_input(self, prompt_stack: PromptStack) -> any:
         if self.model.startswith("llama"):
             return [
-                {"role": prompt_line.role, "content": prompt_line.content}
-                for prompt_line in prompt_stack.inputs
+                [
+                    {"role": prompt_line.role, "content": prompt_line.content}
+                    for prompt_line in prompt_stack.inputs
+                ]
             ]
         elif self.model.startswith("falcon"):
             # https://huggingface.co/tiiuae/falcon-7b-instruct/discussions/1
@@ -68,6 +70,8 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
             return ErrorArtifact("unknown model type")
 
     def try_run(self, prompt_stack: PromptStack) -> TextArtifact:
+        print(self._build_model_input(prompt_stack))
+        print(self._build_model_parameters(prompt_stack))
         payload = {
             "inputs": self._build_model_input(prompt_stack),
             "parameters": self._build_model_parameters(prompt_stack),
@@ -79,4 +83,5 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
             CustomAttributes="accept_eula=true",
         )
 
+        print(response)
         return self._parse_model_output(response)
