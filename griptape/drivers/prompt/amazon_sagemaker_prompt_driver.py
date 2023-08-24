@@ -86,8 +86,6 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
             return ErrorArtifact("unknown model type")
 
     def try_run(self, prompt_stack: PromptStack) -> TextArtifact:
-        print(self._build_model_input(prompt_stack))
-        print(self._build_model_parameters(prompt_stack))
         payload = {
             "inputs": self._build_model_input(prompt_stack),
             "parameters": self._build_model_parameters(prompt_stack),
@@ -99,5 +97,4 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
             CustomAttributes="accept_eula=true",
         )
 
-        print(response)
         return self._parse_model_output(response)

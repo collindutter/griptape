@@ -23,7 +23,6 @@ class OpenAiChatPromptDriver(BasePromptDriver):
     user: str = field(default="", kw_only=True)
 
     def try_run(self, prompt_stack: PromptStack) -> TextArtifact:
-        print(self._base_params(prompt_stack))
         result = openai.ChatCompletion.create(**self._base_params(prompt_stack))
 
         if len(result.choices) == 1:
