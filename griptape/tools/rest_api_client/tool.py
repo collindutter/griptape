@@ -112,7 +112,7 @@ class RestApiClient(BaseTool):
         url = self._build_url(base_url, path=path, path_params=path_params)
 
         try:
-            response = patch(url, data=body, timeout=30)
+            response = patch(url, json=body, timeout=30)
             return TextArtifact(response.text)
         except exceptions.RequestException as err:
             return ErrorArtifact(str(err))
@@ -144,7 +144,8 @@ class RestApiClient(BaseTool):
         body = values["body"]
 
         try:
-            response = post(url, data=body, timeout=30)
+            response = post(url, json=body, timeout=30)
+            print(response.text)
             return TextArtifact(response.text)
         except exceptions.RequestException as err:
             return ErrorArtifact(str(err))
