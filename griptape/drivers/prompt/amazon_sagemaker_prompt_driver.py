@@ -1,15 +1,28 @@
+from __future__ import annotations
 import json
+from typing import TYPE_CHECKING, Type
 import boto3
 from attr import define, field, Factory
-from griptape.artifacts import TextArtifact, ErrorArtifact, BaseArtifact
+from griptape.artifacts import TextArtifact
 from griptape.drivers import BasePromptDriver
-from griptape.core import PromptStack
+
+if TYPE_CHECKING:
+    from griptape.core import PromptStack
+    from griptape.drivers import BasePromptModelDriver
 
 
 @define
 class AmazonSagemakerPromptDriver(BasePromptDriver):
-    endpoint_name: str = field(kw_only=True)
-    session: boto3.Session = field(default=boto3.Session())
+    model: str = field(kw_only=True)
+    prompt_model_driver_class: Type[BasePromptModelDriver] = field(kw_only=True)
+    prompt_model_driver: BasePromptModelDriver = field(
+        default=Factory(lambda self: self.prompt_model_driver_class(prompt_driver=self), takes_self=True),
+        kw_only=True
+    )
+    session: boto3.Session = field(
+        default=Factory(lambda: boto3.Session()),
+        kw_only=True
+    )
     sagemaker_client: boto3.client = field(
         default=Factory(
             lambda self: self.session.client("sagemaker-runtime"),
@@ -17,84 +30,26 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
         ),
         kw_only=True,
     )
-
-    def _build_model_input(self, prompt_stack: PromptStack) -> any:
-        if self.model.startswith("llama"):
-            return [
-                [
-                    {"role": prompt_line.role, "content": prompt_line.content}
-                    for prompt_line in prompt_stack.inputs
-                ]
-            ]
-        elif self.model.startswith("falcon"):
-            return self.default_prompt_stack_to_string_converter(prompt_stack)
-        raise ValueError("unknown model type")
-
-    def default_prompt_stack_to_string_converter(
-        self, prompt_stack: PromptStack
-    ) -> str:
-        if self.model.startswith("llama"):
-            # TODO replace with proper llama prompt builder
-            return super().default_prompt_stack_to_string_converter(prompt_stack)
-        elif self.model.startswith("falcon"):
-            # https://huggingface.co/tiiuae/falcon-7b-instruct/discussions/1
-            prompt_lines = []
-
-            for i in prompt_stack.inputs:
-                if i.is_assistant():
-                    prompt_lines.append(f"Assistant: {i.content}")
-                elif i.is_user():
-                    prompt_lines.append(f"User: {i.content}")
-                elif i.is_system():
-                    prompt_lines.append(f"Context: {i.content}")
-
-            prompt_lines.append("Assistant:")
-
-            prompt = "\n\n" + "\n\n".join(prompt_lines)
-
-            return prompt
-        raise ValueError("unknown model type")
-
-    def _build_model_parameters(self, prompt_stack: PromptStack) -> any:
-        parameters = {
-            "max_new_tokens": self.tokenizer.tokens_left(
-                self.default_prompt_stack_to_string_converter(prompt_stack)
-            ),
-            "temperature": self.temperature,
-        }
-
-        if self.model.startswith("falcon"):
-            parameters["max_tokens"] = self.tokenizer.tokens_left(
-                self.default_prompt_stack_to_string_converter(prompt_stack)
-            )
-            parameters["stop"] = self.tokenizer.stop_sequences
-        return parameters
-
-    def _parse_model_output(self, response: any) -> BaseArtifact:
-        generations = json.loads(response["Body"].read().decode("utf8"))
-
-        if not generations:
-            return ErrorArtifact("no generations from model")
-
-        generation = generations[0]
-
-        if self.model.startswith("llama"):
-            return TextArtifact(generation["generation"]["content"])
-        elif self.model.startswith("falcon"):
-            return TextArtifact(generation["generated_text"])
-        else:
-            return ErrorArtifact("unknown model type")
+    custom_attributes: str = field(
+        default="accept_eula=true",
+        kw_only=True
+    )
 
     def try_run(self, prompt_stack: PromptStack) -> TextArtifact:
         payload = {
-            "inputs": self._build_model_input(prompt_stack),
-            "parameters": self._build_model_parameters(prompt_stack),
+            "inputs": self.prompt_model_driver.prompt_stack_to_model_input(prompt_stack),
+            "parameters": self.prompt_model_driver.model_params(prompt_stack)
         }
         response = self.sagemaker_client.invoke_endpoint(
-            EndpointName=self.endpoint_name,
+            EndpointName=self.model,
             ContentType="application/json",
             Body=json.dumps(payload),
-            CustomAttributes="accept_eula=true",
+            CustomAttributes=self.custom_attributes,
         )
 
-        return self._parse_model_output(response)
+        decoded_body = json.loads(response["Body"].read().decode("utf8"))
+
+        if decoded_body:
+            return self.prompt_model_driver.process_output(decoded_body)
+        else:
+            raise Exception("model response is empty")
