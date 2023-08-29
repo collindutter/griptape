@@ -12,23 +12,18 @@ from tests.mocks.mock_tool.tool import MockTool
 class TestAgent:
     def test_init(self):
         driver = MockPromptDriver()
-        agent = Agent(
-            prompt_driver=driver,
-            rulesets=[Ruleset("TestRuleset", [Rule("test")])]
-        )
+        agent = Agent(prompt_driver=driver, rulesets=[Ruleset("TestRuleset", [Rule("test")])])
 
         assert agent.prompt_driver is driver
         assert isinstance(agent.task, PromptTask)
         assert isinstance(agent.task, PromptTask)
-        assert agent.rulesets[0].name is "TestRuleset"
-        assert agent.rulesets[0].rules[0].value is "test"
+        assert agent.rulesets[0].name == "TestRuleset"
+        assert agent.rulesets[0].rules[0].value == "test"
         assert isinstance(agent.memory, ConversationMemory)
         assert isinstance(Agent(tools=[MockTool()]).task, ToolkitTask)
 
     def test_with_default_tool_memory(self):
-        agent = Agent(
-            tools=[MockTool()]
-        )
+        agent = Agent(tools=[MockTool()])
 
         assert isinstance(agent.tool_memory, TextToolMemory)
         assert agent.tools[0].input_memory[0] == agent.tool_memory
@@ -36,26 +31,18 @@ class TestAgent:
         assert agent.tools[0].output_memory.get("test_without_default_memory") is None
 
     def test_with_default_tool_memory_and_empty_tool_output_memory(self):
-        agent = Agent(
-            tools=[MockTool(output_memory={})]
-        )
+        agent = Agent(tools=[MockTool(output_memory={})])
 
         assert agent.tools[0].output_memory == {}
 
     def test_without_default_tool_memory(self):
-        agent = Agent(
-            tool_memory=None,
-            tools=[MockTool()]
-        )
+        agent = Agent(tool_memory=None, tools=[MockTool()])
 
         assert agent.tools[0].input_memory is None
         assert agent.tools[0].output_memory is None
 
     def test_with_memory(self):
-        agent = Agent(
-            prompt_driver=MockPromptDriver(),
-            memory=ConversationMemory()
-        )
+        agent = Agent(prompt_driver=MockPromptDriver(), memory=ConversationMemory())
 
         assert agent.memory is not None
         assert len(agent.memory.runs) == 0
@@ -74,9 +61,7 @@ class TestAgent:
         first_task = PromptTask("test1")
         second_task = PromptTask("test2")
 
-        agent = Agent(
-            prompt_driver=MockPromptDriver()
-        )
+        agent = Agent(prompt_driver=MockPromptDriver())
 
         assert len(agent.tasks) == 1
 
@@ -102,9 +87,7 @@ class TestAgent:
         first_task = PromptTask("test1")
         second_task = PromptTask("test2")
 
-        agent = Agent(
-            prompt_driver=MockPromptDriver()
-        )
+        agent = Agent(prompt_driver=MockPromptDriver())
 
         try:
             agent.add_tasks(first_task, second_task)
@@ -113,10 +96,7 @@ class TestAgent:
             assert True
 
     def test_prompt_stack_without_memory(self):
-        agent = Agent(
-            prompt_driver=MockPromptDriver(),
-            memory=None
-        )
+        agent = Agent(prompt_driver=MockPromptDriver(), memory=None)
 
         task1 = PromptTask("test")
 
@@ -133,10 +113,7 @@ class TestAgent:
         assert len(task1.prompt_stack.inputs) == 3
 
     def test_prompt_stack_with_memory(self):
-        agent = Agent(
-            prompt_driver=MockPromptDriver(),
-            memory=ConversationMemory()
-        )
+        agent = Agent(prompt_driver=MockPromptDriver(), memory=ConversationMemory())
 
         task1 = PromptTask("test")
 

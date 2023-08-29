@@ -15,7 +15,7 @@ class TestBufferConversationMemory:
             PromptTask("test"),
             PromptTask("test"),
             PromptTask("test"),
-            PromptTask("test")
+            PromptTask("test"),
         )
 
         pipeline.run()

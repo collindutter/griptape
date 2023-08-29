@@ -39,38 +39,35 @@ class EmailClient(BaseTool):
 
     @property
     def schema_template_args(self) -> dict:
-        return {
-            "mailboxes": json.dumps(self.mailboxes) if self.mailboxes else None
-        }
+        return {"mailboxes": json.dumps(self.mailboxes) if self.mailboxes else None}
 
-    @activity(config={
-        "description": "Can be used to retrieve emails."
-                       "{% if mailboxes %} Some of the available mailboxes: {{ mailboxes }}{% endif %}",
-        "schema": Schema({
-            Literal(
-                "label",
-                description="Label to retrieve emails from such as 'INBOX' or 'SENT'"
-            ): str,
-            schema.Optional(
-                Literal(
-                    "key",
-                    description="Optional key for filtering such as 'FROM' or 'SUBJECT'"
-                )
-            ): str,
-            schema.Optional(
-                Literal(
-                    "search_criteria",
-                    description="Optional search criteria to filter emails by key"
-                )
-            ): str,
-            schema.Optional(
-                Literal(
-                    "max_count",
-                    description="Optional max email count"
-                )
-            ): int
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to retrieve emails."
+            "{% if mailboxes %} Some of the available mailboxes: {{ mailboxes }}{% endif %}",
+            "schema": Schema(
+                {
+                    Literal(
+                        "label",
+                        description="Label to retrieve emails from such as 'INBOX' or 'SENT'",
+                    ): str,
+                    schema.Optional(
+                        Literal(
+                            "key",
+                            description="Optional key for filtering such as 'FROM' or 'SUBJECT'",
+                        )
+                    ): str,
+                    schema.Optional(
+                        Literal(
+                            "search_criteria",
+                            description="Optional search criteria to filter emails by key",
+                        )
+                    ): str,
+                    schema.Optional(Literal("max_count", description="Optional max email count")): int,
+                }
+            ),
+        }
+    )
     def retrieve(self, params: dict) -> list[TextArtifact] | ErrorArtifact:
         values = params["values"]
         imap_user = self.imap_user if self.imap_user else self.username
@@ -90,9 +87,7 @@ class EmailClient(BaseTool):
             if mailbox[0] == "OK":
                 if values.get("key") and values.get("search_criteria"):
                     messages_count = len(
-                        con.search(
-                            None, values["key"], f'"{values["search_criteria"]}"'
-                            )[1][0].decode().split(" ")
+                        con.search(None, values["key"], f'"{values["search_criteria"]}"')[1][0].decode().split(" ")
                     )
                 else:
                     messages_count = int(mailbox[1][0])
@@ -103,9 +98,7 @@ class EmailClient(BaseTool):
                     result, data = con.fetch(str(i), "(RFC822)")
                     message = mailparser.parse_from_bytes(data[0][1])
 
-                    artifacts.append(
-                        TextArtifact("\n".join(message.text_plain))
-                    )
+                    artifacts.append(TextArtifact("\n".join(message.text_plain)))
 
                 con.close()
                 con.logout()
@@ -118,23 +111,18 @@ class EmailClient(BaseTool):
 
             return ErrorArtifact(f"error retrieving email {e}")
 
-    @activity(config={
-        "description": "Can be used to send emails",
-        "schema": Schema({
-            Literal(
-                "to",
-                description="Recipient's email address"
-            ): str,
-            Literal(
-                "subject",
-                description="Email subject"
-            ): str,
-            Literal(
-                "body",
-                description="Email body"
-            ): str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to send emails",
+            "schema": Schema(
+                {
+                    Literal("to", description="Recipient's email address"): str,
+                    Literal("subject", description="Email subject"): str,
+                    Literal("body", description="Email body"): str,
+                }
+            ),
+        }
+    )
     def send(self, params: dict) -> InfoArtifact | ErrorArtifact:
         input_values = params["values"]
         server: Optional[smtplib.SMTP] = None

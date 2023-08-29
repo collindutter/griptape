@@ -17,22 +17,25 @@ class RedisVectorStoreDriver(BaseVectorStoreDriver):
     index: str = field(kw_only=True)
 
     client: redis.Redis = field(
-        default=Factory(lambda self: redis.Redis(
-            host=self.host,
-            port=self.port,
-            db=self.db,
-            password=self.password,
-            decode_responses=False
-        ), takes_self=True)
+        default=Factory(
+            lambda self: redis.Redis(
+                host=self.host,
+                port=self.port,
+                db=self.db,
+                password=self.password,
+                decode_responses=False,
+            ),
+            takes_self=True,
+        )
     )
 
     def upsert_vector(
-            self,
-            vector: list[float],
-            vector_id: Optional[str] = None,
-            namespace: Optional[str] = None,
-            meta: Optional[dict] = None,
-            **kwargs
+        self,
+        vector: list[float],
+        vector_id: Optional[str] = None,
+        namespace: Optional[str] = None,
+        meta: Optional[dict] = None,
+        **kwargs,
     ) -> str:
         vector_id = vector_id if vector_id else utils.str_to_hash(str(vector))
         key = self._generate_key(vector_id, namespace)
@@ -40,7 +43,7 @@ class RedisVectorStoreDriver(BaseVectorStoreDriver):
 
         mapping = {
             "vector": np.array(vector, dtype=np.float32).tobytes(),
-            "vec_string": bytes_vector
+            "vec_string": bytes_vector,
         }
 
         if meta:
@@ -56,26 +59,21 @@ class RedisVectorStoreDriver(BaseVectorStoreDriver):
         vector = np.frombuffer(result[b"vector"], dtype=np.float32).tolist()
         meta = json.loads(result[b"metadata"]) if b"metadata" in result else None
 
-        return BaseVectorStoreDriver.Entry(
-            id=vector_id,
-            meta=meta,
-            vector=vector,
-            namespace=namespace
-        )
+        return BaseVectorStoreDriver.Entry(id=vector_id, meta=meta, vector=vector, namespace=namespace)
 
     def load_entries(self, namespace: Optional[str] = None) -> list[BaseVectorStoreDriver.Entry]:
-        pattern = f'{namespace}:*' if namespace else '*'
+        pattern = f"{namespace}:*" if namespace else "*"
         keys = self.client.keys(pattern)
 
-        return [
-            self.load_entry(key.decode("utf-8"), namespace=namespace)
-            for key in keys
-        ]
+        return [self.load_entry(key.decode("utf-8"), namespace=namespace) for key in keys]
 
     def query(
-            self, vector: list[float], count: Optional[int] = None, namespace: Optional[str] = None, **kwargs
+        self,
+        vector: list[float],
+        count: Optional[int] = None,
+        namespace: Optional[str] = None,
+        **kwargs,
     ) -> List[BaseVectorStoreDriver.QueryResult]:
-
         query_expression = (
             Query(f"*=>[KNN {count or 10} @vector $vector as score]")
             .sort_by("score")
@@ -84,9 +82,7 @@ class RedisVectorStoreDriver(BaseVectorStoreDriver):
             .dialect(2)
         )
 
-        query_params = {
-            "vector": np.array(vector, dtype=np.float32).tobytes()
-        }
+        query_params = {"vector": np.array(vector, dtype=np.float32).tobytes()}
 
         results = self.client.ft(self.index).search(query_expression, query_params).docs
 
@@ -98,12 +94,12 @@ class RedisVectorStoreDriver(BaseVectorStoreDriver):
             query_results.append(
                 BaseVectorStoreDriver.QueryResult(
                     vector=vector_float_list,
-                    score=float(document['score']),
+                    score=float(document["score"]),
                     meta=metadata,
-                    namespace=namespace
+                    namespace=namespace,
                 )
             )
         return query_results
 
     def _generate_key(self, vector_id: str, namespace: Optional[str] = None) -> str:
-        return f'{namespace}:{vector_id}' if namespace else vector_id
+        return f"{namespace}:{vector_id}" if namespace else vector_id

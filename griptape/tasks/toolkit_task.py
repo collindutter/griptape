@@ -25,16 +25,13 @@ class ToolkitTask(PromptTask):
     generate_assistant_subtask_template: Callable[[ActionSubtask], str] = field(
         default=Factory(
             lambda self: self.default_assistant_subtask_template_generator,
-            takes_self=True
+            takes_self=True,
         ),
-        kw_only=True
+        kw_only=True,
     )
     generate_user_subtask_template: Callable[[ActionSubtask], str] = field(
-        default=Factory(
-            lambda self: self.default_user_subtask_template_generator,
-            takes_self=True
-        ),
-        kw_only=True
+        default=Factory(lambda self: self.default_user_subtask_template_generator, takes_self=True),
+        kw_only=True,
     )
 
     def __attrs_post_init__(self) -> None:
@@ -72,11 +69,7 @@ class ToolkitTask(PromptTask):
 
     def default_system_template_generator(self, _: PromptTask) -> str:
         memories = [r for r in self.memory if len(r.activities()) > 0]
-        action_schema = utils.minify_json(
-            json.dumps(
-                ActionSubtask.ACTION_SCHEMA.json_schema("ActionSchema")
-            )
-        )
+        action_schema = utils.minify_json(json.dumps(ActionSubtask.ACTION_SCHEMA.json_schema("ActionSchema")))
 
         return J2("tasks/toolkit_task/system.j2").render(
             rulesets=self.structure.rulesets,
@@ -84,18 +77,14 @@ class ToolkitTask(PromptTask):
             tool_names=str.join(", ", [tool.name for tool in self.tools]),
             tools=[J2("tasks/toolkit_task/tool.j2").render(tool=tool) for tool in self.tools],
             memory_names=str.join(", ", [memory.name for memory in memories]),
-            memories=[J2("tasks/toolkit_task/tool_memory.j2").render(memory=memory) for memory in memories]
+            memories=[J2("tasks/toolkit_task/tool_memory.j2").render(memory=memory) for memory in memories],
         )
 
     def default_assistant_subtask_template_generator(self, subtask: ActionSubtask) -> str:
-        return J2("tasks/toolkit_task/assistant_subtask.j2").render(
-            subtask=subtask
-        )
+        return J2("tasks/toolkit_task/assistant_subtask.j2").render(subtask=subtask)
 
     def default_user_subtask_template_generator(self, subtask: ActionSubtask) -> str:
-        return J2("tasks/toolkit_task/user_subtask.j2").render(
-            subtask=subtask
-        )
+        return J2("tasks/toolkit_task/user_subtask.j2").render(subtask=subtask)
 
     def set_default_tools_memory(self, memory: BaseToolMemory) -> None:
         self.tool_memory = memory
@@ -106,8 +95,7 @@ class ToolkitTask(PromptTask):
                     tool.input_memory = [self.tool_memory]
                 if tool.output_memory is None:
                     tool.output_memory = {
-                        a.name: [self.tool_memory]
-                        for a in tool.activities() if tool.activity_uses_default_memory(a)
+                        a.name: [self.tool_memory] for a in tool.activities() if tool.activity_uses_default_memory(a)
                     }
 
     def run(self) -> TextArtifact:
@@ -115,18 +103,12 @@ class ToolkitTask(PromptTask):
 
         self.subtasks.clear()
 
-        subtask = self.add_subtask(
-            ActionSubtask(
-                self.active_driver().run(prompt_stack=self.prompt_stack).to_text()
-            )
-        )
+        subtask = self.add_subtask(ActionSubtask(self.active_driver().run(prompt_stack=self.prompt_stack).to_text()))
 
         while True:
             if subtask.output is None:
                 if len(self.subtasks) >= self.max_subtasks:
-                    subtask.output = ErrorArtifact(
-                        f"Exceeded tool limit of {self.max_subtasks} subtasks per task"
-                    )
+                    subtask.output = ErrorArtifact(f"Exceeded tool limit of {self.max_subtasks} subtasks per task")
                 elif subtask.action_name is None:
                     # handle case when the LLM failed to follow the ReAct prompt and didn't return a proper action
                     subtask.output = TextArtifact(subtask.input_template)
@@ -136,9 +118,7 @@ class ToolkitTask(PromptTask):
                     subtask.after_run()
 
                     subtask = self.add_subtask(
-                        ActionSubtask(
-                            self.active_driver().run(prompt_stack=self.prompt_stack).to_text()
-                        )
+                        ActionSubtask(self.active_driver().run(prompt_stack=self.prompt_stack).to_text())
                     )
             else:
                 break
@@ -161,13 +141,7 @@ class ToolkitTask(PromptTask):
         return subtask
 
     def find_tool(self, tool_name: str) -> Optional[BaseTool]:
-        return next(
-            (t for t in self.tools if t.name == tool_name),
-            None
-        )
+        return next((t for t in self.tools if t.name == tool_name), None)
 
     def find_memory(self, memory_name: str) -> Optional[BaseToolMemory]:
-        return next(
-            (m for m in self.memory if m.name == memory_name),
-            None
-        )
+        return next((m for m in self.memory if m.name == memory_name), None)

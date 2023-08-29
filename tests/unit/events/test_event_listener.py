@@ -7,8 +7,6 @@ from griptape.events import (
     FinishTaskEvent,
     StartSubtaskEvent,
     FinishSubtaskEvent,
-    StartPromptEvent,
-    FinishPromptEvent,
 )
 from tests.mocks.mock_prompt_driver import MockPromptDriver
 from tests.mocks.mock_tool.tool import MockTool
@@ -22,7 +20,7 @@ class TestEventListener:
         pipeline = Pipeline(prompt_driver=MockPromptDriver())
         pipeline.add_task(task)
 
-        task.add_subtask(ActionSubtask('foo'))
+        task.add_subtask(ActionSubtask("foo"))
         return pipeline
 
     def test_list_listeners(self, pipeline):
@@ -33,7 +31,7 @@ class TestEventListener:
             event_handler_1,
             event_handler_2,
         ]
-        # can't mock subtask events, so must manually call 
+        # can't mock subtask events, so must manually call
         pipeline.tasks[0].subtasks[0].before_run()
         pipeline.tasks[0].subtasks[0].after_run()
         pipeline.run()
@@ -54,7 +52,7 @@ class TestEventListener:
             FinishSubtaskEvent: [finish_subtask_event_handler],
         }
 
-        # can't mock subtask events, so must manually call 
+        # can't mock subtask events, so must manually call
         pipeline.tasks[0].subtasks[0].before_run()
         pipeline.tasks[0].subtasks[0].after_run()
         pipeline.run()

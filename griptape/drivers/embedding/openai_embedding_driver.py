@@ -21,7 +21,7 @@ class OpenAiEmbeddingDriver(BaseEmbeddingDriver):
     organization: Optional[str] = field(default=openai.organization, kw_only=True)
     tokenizer: TiktokenTokenizer = field(
         default=Factory(lambda self: TiktokenTokenizer(model=self.model), takes_self=True),
-        kw_only=True
+        kw_only=True,
     )
 
     def __attrs_post_init__(self) -> None:
@@ -71,5 +71,5 @@ class OpenAiEmbeddingDriver(BaseEmbeddingDriver):
             "organization": self.organization,
             "api_version": self.api_version,
             "api_base": self.api_base,
-            "api_type": self.api_type
+            "api_type": self.api_type,
         }

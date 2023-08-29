@@ -24,9 +24,7 @@ class TestLocalConversationMemoryDriver:
         memory = ConversationMemory(driver=memory_driver, autoload=False)
         pipeline = Pipeline(prompt_driver=prompt_driver, memory=memory)
 
-        pipeline.add_task(
-            PromptTask("test")
-        )
+        pipeline.add_task(PromptTask("test"))
 
         try:
             with open(self.MEMORY_FILE_PATH, "r"):
@@ -45,9 +43,7 @@ class TestLocalConversationMemoryDriver:
         memory = ConversationMemory(driver=memory_driver, autoload=False)
         pipeline = Pipeline(prompt_driver=prompt_driver, memory=memory)
 
-        pipeline.add_task(
-            PromptTask("test")
-        )
+        pipeline.add_task(PromptTask("test"))
 
         pipeline.run()
         pipeline.run()
@@ -65,9 +61,7 @@ class TestLocalConversationMemoryDriver:
         memory = ConversationMemory(driver=memory_driver)
         pipeline = Pipeline(prompt_driver=prompt_driver, memory=memory)
 
-        pipeline.add_task(
-            PromptTask("test")
-        )
+        pipeline.add_task(PromptTask("test"))
 
         pipeline.run()
         pipeline.run()

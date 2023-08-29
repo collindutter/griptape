@@ -13,16 +13,13 @@ if TYPE_CHECKING:
 
 @define
 class BlobToolMemory(BaseToolMemory):
-    driver: BaseBlobToolMemoryDriver = field(
-        default=Factory(lambda: LocalBlobToolMemoryDriver()),
-        kw_only=True
-    )
+    driver: BaseBlobToolMemoryDriver = field(default=Factory(lambda: LocalBlobToolMemoryDriver()), kw_only=True)
 
     def process_output(
-            self,
-            tool_activity: callable,
-            subtask: ActionSubtask,
-            value: Union[BaseArtifact, list[BaseArtifact]]
+        self,
+        tool_activity: callable,
+        subtask: ActionSubtask,
+        value: Union[BaseArtifact, list[BaseArtifact]],
     ) -> BaseArtifact:
         from griptape.utils import J2
 
@@ -52,7 +49,7 @@ class BlobToolMemory(BaseToolMemory):
                 memory_name=self.name,
                 tool_name=tool_name,
                 activity_name=activity_name,
-                artifact_namespace=namespace
+                artifact_namespace=namespace,
             )
 
             return InfoArtifact(output)

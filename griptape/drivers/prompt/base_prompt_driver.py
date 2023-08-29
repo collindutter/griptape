@@ -16,11 +16,8 @@ class BasePromptDriver(ExponentialBackoffMixin, ABC):
     max_tokens: Optional[int] = field(default=None, kw_only=True)
     structure: Optional[Structure] = field(default=None, kw_only=True)
     prompt_stack_to_string: Callable[[PromptStack], str] = field(
-        default=Factory(
-            lambda self: self.default_prompt_stack_to_string_converter,
-            takes_self=True
-        ),
-        kw_only=True
+        default=Factory(lambda self: self.default_prompt_stack_to_string_converter, takes_self=True),
+        kw_only=True,
     )
 
     model: str
@@ -33,9 +30,7 @@ class BasePromptDriver(ExponentialBackoffMixin, ABC):
             return self.tokenizer.tokens_left(text)
 
     def token_count(self, prompt_stack: PromptStack) -> int:
-        return self.tokenizer.token_count(
-            self.prompt_stack_to_string(prompt_stack)
-        )
+        return self.tokenizer.token_count(self.prompt_stack_to_string(prompt_stack))
 
     def run(self, prompt_stack: PromptStack) -> TextArtifact:
         for attempt in self.retrying():

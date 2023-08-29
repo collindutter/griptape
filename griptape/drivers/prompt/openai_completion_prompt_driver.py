@@ -18,7 +18,7 @@ class OpenAiCompletionPromptDriver(BasePromptDriver):
     model: str = field(default=TiktokenTokenizer.DEFAULT_OPENAI_GPT_3_COMPLETION_MODEL, kw_only=True)
     tokenizer: TiktokenTokenizer = field(
         default=Factory(lambda self: TiktokenTokenizer(model=self.model), takes_self=True),
-        kw_only=True
+        kw_only=True,
     )
     user: str = field(default="", kw_only=True)
 
@@ -26,9 +26,7 @@ class OpenAiCompletionPromptDriver(BasePromptDriver):
         result = openai.Completion.create(**self._base_params(prompt_stack))
 
         if len(result.choices) == 1:
-            return TextArtifact(
-                value=result.choices[0].text.strip()
-            )
+            return TextArtifact(value=result.choices[0].text.strip())
         else:
             raise Exception("Completion with more than one choice is not supported yet.")
 
@@ -46,5 +44,5 @@ class OpenAiCompletionPromptDriver(BasePromptDriver):
             "api_version": self.api_version,
             "api_base": self.api_base,
             "api_type": self.api_type,
-            "prompt": prompt
+            "prompt": prompt,
         }

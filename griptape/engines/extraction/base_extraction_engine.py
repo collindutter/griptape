@@ -7,9 +7,5 @@ from griptape.artifacts import TextArtifact, BaseArtifact
 @define
 class BaseExtractionEngine(ABC):
     @abstractmethod
-    def extract(
-            self,
-            artifacts: list[TextArtifact],
-            fields: list[str]
-    ) -> list[BaseArtifact] | BaseArtifact:
+    def extract(self, artifacts: list[TextArtifact], fields: list[str]) -> list[BaseArtifact] | BaseArtifact:
         ...

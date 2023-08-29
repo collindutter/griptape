@@ -18,28 +18,25 @@ class VectorStoreClient(BaseTool):
 
     @property
     def schema_template_args(self) -> dict:
-        return {
-            "description": self.description
-        }
+        return {"description": self.description}
 
-    @activity(config={
-        "description":
-            "Can be used to search a vector database with the following description: {{ description }}",
-        "schema": Schema({
-            Literal(
-                "query",
-                description="A natural language search query to run against the vector database"
-            ): str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to search a vector database with the following description: {{ description }}",
+            "schema": Schema(
+                {
+                    Literal(
+                        "query",
+                        description="A natural language search query to run against the vector database",
+                    ): str
+                }
+            ),
+        }
+    )
     def search(self, params: dict) -> BaseArtifact:
         query = params["values"]["query"]
 
         try:
-            return self.query_engine.query(
-                query,
-                top_n=self.top_n,
-                namespace=self.namespace
-            )
+            return self.query_engine.query(query, top_n=self.top_n, namespace=self.namespace)
         except Exception as e:
             return ErrorArtifact(f"error querying vector store: {e}")

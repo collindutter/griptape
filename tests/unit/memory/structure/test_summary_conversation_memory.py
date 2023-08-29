@@ -13,9 +13,7 @@ class TestSummaryConversationMemory:
 
         pipeline = Pipeline(memory=memory, prompt_driver=MockPromptDriver())
 
-        pipeline.add_tasks(
-            PromptTask("test")
-        )
+        pipeline.add_tasks(PromptTask("test"))
 
         pipeline.run()
         pipeline.run()
@@ -29,9 +27,7 @@ class TestSummaryConversationMemory:
 
         pipeline = Pipeline(memory=memory, prompt_driver=MockPromptDriver())
 
-        pipeline.add_tasks(
-            PromptTask("test")
-        )
+        pipeline.add_tasks(PromptTask("test"))
 
         pipeline.run()
         pipeline.run()

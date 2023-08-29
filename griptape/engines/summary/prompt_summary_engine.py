@@ -10,28 +10,19 @@ from griptape.utils import J2
 
 @define
 class PromptSummaryEngine(BaseSummaryEngine):
-    chunk_joiner: str = field(
-        default="\n\n",
-        kw_only=True
-    )
-    max_token_multiplier: float = field(
-        default=0.5,
-        kw_only=True
-    )
-    template_generator: J2 = field(
-        default=Factory(lambda: J2("engines/prompt_summary.j2")),
-        kw_only=True
-    )
-    prompt_driver: BasePromptDriver = field(
-        default=Factory(lambda: OpenAiChatPromptDriver()),
-        kw_only=True
-    )
+    chunk_joiner: str = field(default="\n\n", kw_only=True)
+    max_token_multiplier: float = field(default=0.5, kw_only=True)
+    template_generator: J2 = field(default=Factory(lambda: J2("engines/prompt_summary.j2")), kw_only=True)
+    prompt_driver: BasePromptDriver = field(default=Factory(lambda: OpenAiChatPromptDriver()), kw_only=True)
     chunker: BaseChunker = field(
-        default=Factory(lambda self: TextChunker(
-            tokenizer=self.prompt_driver.tokenizer,
-            max_tokens=self.max_chunker_tokens
-        ), takes_self=True),
-        kw_only=True
+        default=Factory(
+            lambda self: TextChunker(
+                tokenizer=self.prompt_driver.tokenizer,
+                max_tokens=self.max_chunker_tokens,
+            ),
+            takes_self=True,
+        ),
+        kw_only=True,
     )
 
     @max_token_multiplier.validator
@@ -48,9 +39,8 @@ class PromptSummaryEngine(BaseSummaryEngine):
     @property
     def min_response_tokens(self) -> int:
         return round(
-            self.prompt_driver.tokenizer.max_tokens -
-            self.prompt_driver.tokenizer.max_tokens *
-            self.max_token_multiplier
+            self.prompt_driver.tokenizer.max_tokens
+            - self.prompt_driver.tokenizer.max_tokens * self.max_token_multiplier
         )
 
     def summarize_artifacts(self, artifacts: list[BaseArtifact]) -> TextArtifact:
@@ -59,30 +49,20 @@ class PromptSummaryEngine(BaseSummaryEngine):
     def summarize_artifacts_rec(self, artifacts: list[BaseArtifact], summary: Optional[str]) -> TextArtifact:
         artifacts_text = self.chunk_joiner.join([a.to_text() for a in artifacts])
 
-        full_text = self.template_generator.render(
-            summary=summary,
-            text=artifacts_text
-        )
+        full_text = self.template_generator.render(summary=summary, text=artifacts_text)
 
         if self.prompt_driver.tokenizer.tokens_left(full_text) >= self.min_response_tokens:
             return self.prompt_driver.run(
-                PromptStack(
-                    inputs=[PromptStack.Input(full_text, role=PromptStack.USER_ROLE)]
-                )
+                PromptStack(inputs=[PromptStack.Input(full_text, role=PromptStack.USER_ROLE)])
             )
         else:
             chunks = self.chunker.chunk(artifacts_text)
 
-            partial_text = self.template_generator.render(
-                summary=summary,
-                text=chunks[0].value
-            )
+            partial_text = self.template_generator.render(summary=summary, text=chunks[0].value)
 
             return self.summarize_artifacts_rec(
                 chunks[1:],
                 self.prompt_driver.run(
-                    PromptStack(
-                        inputs=[PromptStack.Input(partial_text, role=PromptStack.USER_ROLE)]
-                    )
-                ).value
+                    PromptStack(inputs=[PromptStack.Input(partial_text, role=PromptStack.USER_ROLE)])
+                ).value,
             )

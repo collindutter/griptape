@@ -5,7 +5,6 @@ from griptape import utils
 from griptape.artifacts import TextArtifact
 from griptape.loaders import TextLoader
 import trafilatura
-from trafilatura.settings import use_config
 
 
 @define
@@ -14,10 +13,9 @@ class WebLoader(TextLoader):
         return self._load_page(url, include_links)
 
     def load_collection(self, urls: list[str], include_links: bool = True) -> dict[str, list[TextArtifact]]:
-        return utils.execute_futures_dict({
-            utils.str_to_hash(u): self.futures_executor.submit(self._load_page, u, include_links)
-            for u in urls
-        })
+        return utils.execute_futures_dict(
+            {utils.str_to_hash(u): self.futures_executor.submit(self._load_page, u, include_links) for u in urls}
+        )
 
     def _load_page(self, url: str, include_links: bool = True) -> list[TextArtifact]:
         config = trafilatura.settings.use_config()
@@ -39,7 +37,7 @@ class WebLoader(TextLoader):
                     page,
                     include_links=include_links,
                     output_format="json",
-                    config=config
+                    config=config,
                 )
             )
 

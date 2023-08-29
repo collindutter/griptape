@@ -14,10 +14,8 @@ class AzureOpenAiEmbeddingDriver(OpenAiEmbeddingDriver):
     api_version: str = field(default="2023-05-15", kw_only=True)
     tokenizer: TiktokenTokenizer = field(
         default=Factory(lambda self: TiktokenTokenizer(model=self.model), takes_self=True),
-        kw_only=True
+        kw_only=True,
     )
 
     def _params(self, chunk: Union[list[int], str]) -> dict:
-        return super()._params(chunk) | {
-            "deployment_id": self.deployment_id
-        }
+        return super()._params(chunk) | {"deployment_id": self.deployment_id}

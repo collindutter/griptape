@@ -8,5 +8,5 @@ __all__ = [
     "Run",
     "ConversationMemory",
     "SummaryConversationMemory",
-    "BufferConversationMemory"
+    "BufferConversationMemory",
 ]

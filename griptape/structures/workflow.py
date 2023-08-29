@@ -10,10 +10,7 @@ from griptape.tasks import BaseTask
 
 @define
 class Workflow(Structure):
-    futures_executor: futures.Executor = field(
-        default=Factory(lambda: futures.ThreadPoolExecutor()),
-        kw_only=True
-    )
+    futures_executor: futures.Executor = field(default=Factory(lambda: futures.ThreadPoolExecutor()), kw_only=True)
 
     def __add__(self, other: Union[BaseTask, list[BaseTask]]) -> BaseTask:
         return [self.add_task(o) for o in other] if isinstance(other, list) else self + [other]
@@ -54,9 +51,11 @@ class Workflow(Structure):
 
         context.update(
             {
-                "parent_outputs": {parent.id: parent.output.to_text() if parent.output else "" for parent in task.parents},
+                "parent_outputs": {
+                    parent.id: parent.output.to_text() if parent.output else "" for parent in task.parents
+                },
                 "parents": {parent.id: parent for parent in task.parents},
-                "children": {child.id: child for child in task.children}
+                "children": {child.id: child for child in task.children},
             }
         )
 

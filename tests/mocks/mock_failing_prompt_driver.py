@@ -17,6 +17,6 @@ class MockFailingPromptDriver(BasePromptDriver):
         if self.current_attempt < self.max_failures:
             self.current_attempt += 1
 
-            raise Exception(f"failed attempt")
+            raise Exception("failed attempt")
         else:
             return TextArtifact("success")

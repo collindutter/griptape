@@ -1,6 +1,5 @@
 import pytest
 import mongomock
-from pymongo import MongoClient
 from griptape.artifacts import TextArtifact
 from griptape.drivers import MongoDbAtlasVectorStoreDriver, BaseVectorStoreDriver
 from tests.mocks.mock_embedding_driver import MockEmbeddingDriver
@@ -15,7 +14,7 @@ class TestMongoDbAtlasVectorStoreDriver:
             connection_string="mongodb://mock_connection_string",
             database_name="mock_database_name",
             collection_name="mock_collection_name",
-            client=mongomock.MongoClient()
+            client=mongomock.MongoClient(),
         )
 
     def test_upsert_vector(self, driver):
@@ -38,13 +37,13 @@ class TestMongoDbAtlasVectorStoreDriver:
     def test_query(self, driver, monkeypatch):
         mock_query_result = [
             BaseVectorStoreDriver.QueryResult(vector=[0.5, 0.5, 0.5], score=None, meta={}, namespace=None),
-            BaseVectorStoreDriver.QueryResult(vector=[0.5, 0.5, 0.5], score=None, meta={}, namespace=None)
+            BaseVectorStoreDriver.QueryResult(vector=[0.5, 0.5, 0.5], score=None, meta={}, namespace=None),
         ]
 
         monkeypatch.setattr(
             MongoDbAtlasVectorStoreDriver,
             "query",
-            lambda *args, **kwargs: mock_query_result
+            lambda *args, **kwargs: mock_query_result,
         )
 
         query_str = "some query string"

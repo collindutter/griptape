@@ -9,10 +9,7 @@ from attr import define, field, Factory
 class BaseTokenizer(ABC):
     DEFAULT_STOP_SEQUENCES = ["Observation:"]
 
-    stop_sequences: list[str] = field(
-        default=Factory(lambda: BaseTokenizer.DEFAULT_STOP_SEQUENCES),
-        kw_only=True
-    )
+    stop_sequences: list[str] = field(default=Factory(lambda: BaseTokenizer.DEFAULT_STOP_SEQUENCES), kw_only=True)
 
     @property
     @abstractmethod

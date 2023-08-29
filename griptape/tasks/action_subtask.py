@@ -27,25 +27,11 @@ class ActionSubtask(PromptTask):
     ACTION_SCHEMA = Schema(
         description="Actions have type, name, activity, and input value.",
         schema={
-            Literal(
-                "type",
-                description="Action type"
-            ): schema.Or("tool", "memory"),
-            Literal(
-                "name",
-                description="Action name"
-            ): str,
-            Literal(
-                "activity",
-                description="Action activity"
-            ): str,
-            schema.Optional(
-                Literal(
-                    "input",
-                    description="Optional action activity input object"
-                )
-            ): dict
-        }
+            Literal("type", description="Action type"): schema.Or("tool", "memory"),
+            Literal("name", description="Action name"): str,
+            Literal("activity", description="Action activity"): str,
+            schema.Optional(Literal("input", description="Optional action activity input object")): dict,
+        },
     )
 
     parent_task_id: Optional[str] = field(default=None, kw_only=True)
@@ -161,13 +147,10 @@ class ActionSubtask(PromptTask):
         if len(action_matches) > 0:
             try:
                 data = action_matches[-1]
-                data = data.replace('\n', '')
+                data = data.replace("\n", "")
                 action_object: dict = json.loads(data)
 
-                validate(
-                    instance=action_object,
-                    schema=self.ACTION_SCHEMA.schema
-                )
+                validate(instance=action_object, schema=self.ACTION_SCHEMA.schema)
 
                 # Load action type; throw exception if the key is not present
                 if self.action_type is None:
@@ -225,10 +208,7 @@ class ActionSubtask(PromptTask):
             activity_schema = mixin.activity_schema(getattr(mixin, self.action_activity))
 
             if activity_schema:
-                validate(
-                    instance=self.action_input,
-                    schema=activity_schema
-                )
+                validate(instance=self.action_input, schema=activity_schema)
         except ValidationError as e:
             self.structure.logger.error(f"Subtask {self.task.id}\nInvalid activity input JSON: {e}")
 

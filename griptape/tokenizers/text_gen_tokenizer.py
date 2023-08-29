@@ -1,4 +1,4 @@
-from attr import define, field, Factory
+from attr import define, field
 from griptape.tokenizers import BaseTokenizer
 from transformers import PreTrainedTokenizerBase
 
@@ -17,9 +17,7 @@ class TextGenTokenizer(BaseTokenizer):
 
     """
 
-    tokenizer: PreTrainedTokenizerBase = field(
-        kw_only=True
-    )
+    tokenizer: PreTrainedTokenizerBase = field(kw_only=True)
 
     @property
     def max_tokens(self) -> int:

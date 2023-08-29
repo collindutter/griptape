@@ -19,8 +19,8 @@ class TestPipeline:
         assert pipeline.prompt_driver is driver
         assert pipeline.first_task() is None
         assert pipeline.last_task() is None
-        assert pipeline.rulesets[0].name is "TestRuleset"
-        assert pipeline.rulesets[0].rules[0].value is "test"
+        assert pipeline.rulesets[0].name == "TestRuleset"
+        assert pipeline.rulesets[0].rules[0].value == "test"
         assert pipeline.memory is None
 
     def test_with_default_tool_memory(self):
@@ -56,10 +56,7 @@ class TestPipeline:
         second_task = PromptTask("test2")
         third_task = PromptTask("test3")
 
-        pipeline = Pipeline(
-            prompt_driver=MockPromptDriver(),
-            memory=ConversationMemory()
-        )
+        pipeline = Pipeline(prompt_driver=MockPromptDriver(), memory=ConversationMemory())
 
         pipeline + [first_task, second_task, third_task]
 
@@ -81,9 +78,7 @@ class TestPipeline:
         second_task = PromptTask("test2")
         third_task = PromptTask("test3")
 
-        pipeline = Pipeline(
-            prompt_driver=MockPromptDriver()
-        )
+        pipeline = Pipeline(prompt_driver=MockPromptDriver())
 
         pipeline + first_task
         pipeline + second_task
@@ -98,9 +93,7 @@ class TestPipeline:
         first_task = PromptTask("test1")
         second_task = PromptTask("test2")
 
-        pipeline = Pipeline(
-            prompt_driver=MockPromptDriver()
-        )
+        pipeline = Pipeline(prompt_driver=MockPromptDriver())
 
         pipeline + first_task
         pipeline + second_task
@@ -119,9 +112,7 @@ class TestPipeline:
         first_task = PromptTask("test1")
         second_task = PromptTask("test2")
 
-        pipeline = Pipeline(
-            prompt_driver=MockPromptDriver()
-        )
+        pipeline = Pipeline(prompt_driver=MockPromptDriver())
 
         pipeline + [first_task, second_task]
 
@@ -136,9 +127,7 @@ class TestPipeline:
         assert len(second_task.children) == 0
 
     def test_prompt_stack_without_memory(self):
-        pipeline = Pipeline(
-            prompt_driver=MockPromptDriver()
-        )
+        pipeline = Pipeline(prompt_driver=MockPromptDriver())
 
         task1 = PromptTask("test")
         task2 = PromptTask("test")
@@ -159,10 +148,7 @@ class TestPipeline:
         assert len(task2.prompt_stack.inputs) == 3
 
     def test_prompt_stack_with_memory(self):
-        pipeline = Pipeline(
-            prompt_driver=MockPromptDriver(),
-            memory=ConversationMemory()
-        )
+        pipeline = Pipeline(prompt_driver=MockPromptDriver(), memory=ConversationMemory())
 
         task1 = PromptTask("test")
         task2 = PromptTask("test")

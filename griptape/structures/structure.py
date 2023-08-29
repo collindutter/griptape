@@ -24,10 +24,8 @@ class Structure(ABC):
 
     id: str = field(default=Factory(lambda: uuid.uuid4().hex), kw_only=True)
     prompt_driver: BasePromptDriver = field(
-        default=Factory(lambda: OpenAiChatPromptDriver(
-            model=TiktokenTokenizer.DEFAULT_OPENAI_GPT_4_MODEL
-        )),
-        kw_only=True
+        default=Factory(lambda: OpenAiChatPromptDriver(model=TiktokenTokenizer.DEFAULT_OPENAI_GPT_4_MODEL)),
+        kw_only=True,
     )
     rulesets: list[Ruleset] = field(factory=list, kw_only=True)
     tasks: list[BaseTask] = field(factory=list, kw_only=True)
@@ -35,10 +33,7 @@ class Structure(ABC):
     logger_level: int = field(default=logging.INFO, kw_only=True)
     event_listeners: Union[list[Callable], dict[Type[BaseEvent], list[Callable]]] = field(factory=list, kw_only=True)
     memory: Optional[ConversationMemory] = field(default=None, kw_only=True)
-    tool_memory: Optional[BaseToolMemory] = field(
-        default=Factory(lambda: TextToolMemory()),
-        kw_only=True
-    )
+    tool_memory: Optional[BaseToolMemory] = field(default=Factory(lambda: TextToolMemory()), kw_only=True)
     _execution_args: tuple = ()
     _logger: Optional[Logger] = None
 
@@ -70,12 +65,7 @@ class Structure(ABC):
                 self._logger.propagate = False
                 self._logger.level = self.logger_level
 
-                self._logger.handlers = [
-                    RichHandler(
-                        show_time=True,
-                        show_path=False
-                    )
-                ]
+                self._logger.handlers = [RichHandler(show_time=True, show_path=False)]
             return self._logger
 
     def is_finished(self) -> bool:

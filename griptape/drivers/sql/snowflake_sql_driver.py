@@ -14,25 +14,19 @@ class SnowflakeSqlDriver(BaseSqlDriver):
         default=Factory(
             # Creator bypasses the URL param
             # https://docs.sqlalchemy.org/en/14/core/engines.html#sqlalchemy.create_engine.params.creator
-            lambda self: create_engine(
-                "snowflake://not@used/db", creator=self.connection_func
-            ),
+            lambda self: create_engine("snowflake://not@used/db", creator=self.connection_func),
             takes_self=True,
         ),
         kw_only=True,
     )
 
     @connection_func.validator
-    def validate_connection_func(
-        self, _, connection_func: Callable[[], SnowflakeConnection]
-    ) -> None:
+    def validate_connection_func(self, _, connection_func: Callable[[], SnowflakeConnection]) -> None:
         snowflake_connection = connection_func()
         if not isinstance(snowflake_connection, SnowflakeConnection):
             raise ValueError("The connection_func must return a SnowflakeConnection")
         if not snowflake_connection.schema or not snowflake_connection.database:
-            raise ValueError(
-                "Provide a schema and database for the Snowflake connection"
-            )
+            raise ValueError("Provide a schema and database for the Snowflake connection")
 
     @engine.validator
     def validate_engine_url(self, _, engine: Engine) -> None:
@@ -52,16 +46,11 @@ class SnowflakeSqlDriver(BaseSqlDriver):
             results = con.execute(text(query))
 
             if results.returns_rows:
-                return [
-                    {column: value for column, value in result.items()}
-                    for result in results
-                ]
+                return [{column: value for column, value in result.items()} for result in results]
             else:
                 return None
 
-    def get_table_schema(
-        self, table: str, schema: Optional[str] = None
-    ) -> Optional[str]:
+    def get_table_schema(self, table: str, schema: Optional[str] = None) -> Optional[str]:
         try:
             metadata_obj = MetaData()
             metadata_obj.reflect(bind=self.engine)

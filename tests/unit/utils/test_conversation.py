@@ -9,9 +9,7 @@ class TestConversation:
     def test_lines(self):
         pipeline = Pipeline(prompt_driver=MockPromptDriver(), memory=ConversationMemory())
 
-        pipeline.add_tasks(
-            PromptTask("question 1")
-        )
+        pipeline.add_tasks(PromptTask("question 1"))
 
         pipeline.run()
         pipeline.run()
@@ -26,9 +24,7 @@ class TestConversation:
     def test___str__(self):
         pipeline = Pipeline(prompt_driver=MockPromptDriver(), memory=ConversationMemory())
 
-        pipeline.add_tasks(
-            PromptTask("question 1")
-        )
+        pipeline.add_tasks(PromptTask("question 1"))
 
         pipeline.run()
 

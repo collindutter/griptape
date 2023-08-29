@@ -56,9 +56,7 @@ class Computer(BaseTool):
 
     @property
     def schema_template_args(self) -> dict:
-        return {
-            "dependencies": self.dependencies()
-        }
+        return {"dependencies": self.dependencies()}
 
     def install_dependencies(self, env: Optional[dict[str, str]] = None) -> None:
         super().install_dependencies(env)
@@ -69,9 +67,9 @@ class Computer(BaseTool):
     @activity(
         config={
             "description": "Can be used to execute Python code to solve any programmatic tasks and access and analyze"
-                           " files in the file system. If you need to use code output use `print` statements. "
-                           "You have access to the following external Python libraries: "
-                           "{{ dependencies }}",
+            " files in the file system. If you need to use code output use `print` statements. "
+            "You have access to the following external Python libraries: "
+            "{{ dependencies }}",
             "schema": Schema(
                 {
                     Literal("code", description="Python code to execute"): str,
@@ -150,9 +148,7 @@ class Computer(BaseTool):
             with open(local_file_path, "w") as f:
                 f.write(code)
 
-            return self.execute_command_in_container(
-                f"python {container_file_path}"
-            )
+            return self.execute_command_in_container(f"python {container_file_path}")
         except Exception as e:
             return ErrorArtifact(f"error executing code: {e}")
         finally:
@@ -187,9 +183,7 @@ class Computer(BaseTool):
             shutil.copy(self.dockerfile_path, temp_dir)
             shutil.copy(self.requirements_txt_path, temp_dir)
 
-            image = self.docker_client.images.build(
-                path=temp_dir, tag=self.image_name(tool), rm=True, forcerm=True
-            )
+            image = self.docker_client.images.build(path=temp_dir, tag=self.image_name(tool), rm=True, forcerm=True)
 
             response = [line for line in image]
 

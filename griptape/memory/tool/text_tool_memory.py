@@ -15,23 +15,15 @@ if TYPE_CHECKING:
 
 @define
 class TextToolMemory(BaseToolMemory):
-    query_engine: VectorQueryEngine = field(
-        kw_only=True,
-        default=Factory(lambda: VectorQueryEngine())
-    )
-    summary_engine: BaseSummaryEngine = field(
-        kw_only=True,
-        default=Factory(lambda: PromptSummaryEngine())
-    )
+    query_engine: VectorQueryEngine = field(kw_only=True, default=Factory(lambda: VectorQueryEngine()))
+    summary_engine: BaseSummaryEngine = field(kw_only=True, default=Factory(lambda: PromptSummaryEngine()))
 
-    @activity(config={
-        "description": "Can be used to insert text into a memory",
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str,
-            "text": str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to insert text into a memory",
+            "schema": Schema({"memory_name": str, "artifact_namespace": str, "text": str}),
+        }
+    )
     def insert(self, params: dict):
         artifact_namespace = params["values"]["artifact_namespace"]
         text = params["values"]["text"]
@@ -40,14 +32,13 @@ class TextToolMemory(BaseToolMemory):
 
         return InfoArtifact("text was successfully inserted")
 
-    @activity(config={
-        "description": "Can be used to summarize memory",
-        "uses_default_memory": False,
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to summarize memory",
+            "uses_default_memory": False,
+            "schema": Schema({"memory_name": str, "artifact_namespace": str}),
+        }
+    )
     def summarize(self, params: dict) -> TextArtifact | ErrorArtifact:
         artifact_namespace = params["values"]["artifact_namespace"]
 
@@ -55,19 +46,23 @@ class TextToolMemory(BaseToolMemory):
             self.load_artifacts(artifact_namespace),
         )
 
-    @activity(config={
-        "description": "Can be used to search memory",
-        "uses_default_memory": False,
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str,
-            Literal(
-                "query",
-                description="A natural language search query in the form of a question with enough "
-                            "contextual information for another person to understand what the query is about"
-            ): str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to search memory",
+            "uses_default_memory": False,
+            "schema": Schema(
+                {
+                    "memory_name": str,
+                    "artifact_namespace": str,
+                    Literal(
+                        "query",
+                        description="A natural language search query in the form of a question with enough "
+                        "contextual information for another person to understand what the query is about",
+                    ): str,
+                }
+            ),
+        }
+    )
     def search(self, params: dict) -> TextArtifact | ErrorArtifact:
         artifact_namespace = params["values"]["artifact_namespace"]
         query = params["values"]["query"]
@@ -75,14 +70,14 @@ class TextToolMemory(BaseToolMemory):
         return self.query_engine.query(
             query,
             metadata=self.namespace_metadata.get(artifact_namespace),
-            namespace=artifact_namespace
+            namespace=artifact_namespace,
         )
 
     def process_output(
-            self,
-            tool_activity: callable,
-            subtask: ActionSubtask,
-            value: Union[BaseArtifact, list[BaseArtifact]]
+        self,
+        tool_activity: callable,
+        subtask: ActionSubtask,
+        value: Union[BaseArtifact, list[BaseArtifact]],
     ) -> BaseArtifact:
         from griptape.utils import J2
 
@@ -92,10 +87,7 @@ class TextToolMemory(BaseToolMemory):
         if isinstance(value, TextArtifact):
             namespace = value.name
 
-            self.query_engine.upsert_text_artifact(
-                value,
-                namespace=namespace
-            )
+            self.query_engine.upsert_text_artifact(value, namespace=namespace)
         elif isinstance(value, list):
             artifacts = [a for a in value if isinstance(a, TextArtifact)]
 
@@ -115,7 +107,7 @@ class TextToolMemory(BaseToolMemory):
                 memory_name=self.name,
                 tool_name=tool_name,
                 activity_name=activity_name,
-                artifact_namespace=namespace
+                artifact_namespace=namespace,
             )
 
             return InfoArtifact(output)

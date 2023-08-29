@@ -19,7 +19,7 @@ class ActivityMixin:
             raise ValueError("can't have both allowlist and denylist specified")
 
         for activity_name in allowlist:
-            self._validate_tool_activity( activity_name)
+            self._validate_tool_activity(activity_name)
 
     @denylist.validator
     def validate_denylist(self, _, denylist: Optional[list[str]]) -> None:
@@ -79,9 +79,7 @@ class ActivityMixin:
         if activity is None or not getattr(activity, "is_activity", False):
             raise Exception("This method is not an activity.")
         elif activity.config["schema"]:
-            full_schema = {
-                "values": activity.config["schema"].schema if activity.config["schema"] else {}
-            }
+            full_schema = {"values": activity.config["schema"].schema if activity.config["schema"] else {}}
 
             return Schema(full_schema).json_schema("InputSchema")
         else:
@@ -93,6 +91,4 @@ class ActivityMixin:
         activity = getattr(tool, activity_name, None)
 
         if not activity or not getattr(activity, "is_activity", False):
-            raise ValueError(
-                f"activity {activity_name} is not a valid activity for {tool}"
-            )
+            raise ValueError(f"activity {activity_name} is not a valid activity for {tool}")

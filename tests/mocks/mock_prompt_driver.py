@@ -11,4 +11,4 @@ class MockPromptDriver(BasePromptDriver):
     tokenizer: BaseTokenizer = TiktokenTokenizer()
 
     def try_run(self, prompt_stack: PromptStack) -> TextArtifact:
-        return TextArtifact(value=f"mock output")
+        return TextArtifact(value="mock output")

@@ -29,12 +29,7 @@ class PromptStack:
     inputs: list[Input] = field(factory=list, kw_only=True)
 
     def add_input(self, content: str, role: str) -> Input:
-        self.inputs.append(
-            self.Input(
-                content=content,
-                role=role
-            )
-        )
+        self.inputs.append(self.Input(content=content, role=role))
 
         return self.inputs[-1]
 

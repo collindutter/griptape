@@ -4,7 +4,6 @@ import pytest
 import yaml
 from schema import SchemaMissingKeyError
 
-from griptape.artifacts import TextArtifact
 from griptape.drivers import LocalVectorStoreDriver
 from griptape.engines import VectorQueryEngine
 from griptape.memory.tool import TextToolMemory
@@ -16,11 +15,7 @@ from tests.mocks.mock_tool.tool import MockTool
 class TestBaseTool:
     @pytest.fixture
     def tool(self):
-        return MockTool(
-            test_field="hello",
-            test_int=5,
-            test_dict={"foo": "bar"}
-        )
+        return MockTool(test_field="hello", test_int=5, test_dict={"foo": "bar"})
 
     def test_manifest_path(self, tool):
         assert tool.manifest_path == os.path.join(tool.abs_dir_path, tool.MANIFEST_FILE)
@@ -51,24 +46,20 @@ class TestBaseTool:
 
     def test_invalid_config(self):
         try:
-            from tests.mocks.invalid_mock_tool.tool import InvalidMockTool
-
             assert False
-        except SchemaMissingKeyError as e:
+        except SchemaMissingKeyError:
             assert True
 
     def test_memory(self):
         query_engine = VectorQueryEngine(
-            vector_store_driver=LocalVectorStoreDriver(
-                embedding_driver=MockEmbeddingDriver()
-            )
+            vector_store_driver=LocalVectorStoreDriver(embedding_driver=MockEmbeddingDriver())
         )
 
         tool = MockTool(
             output_memory={
                 "test": [
                     TextToolMemory(name="Memory1", query_engine=query_engine),
-                    TextToolMemory(name="Memory2", query_engine=query_engine)
+                    TextToolMemory(name="Memory2", query_engine=query_engine),
                 ]
             }
         )
@@ -77,9 +68,7 @@ class TestBaseTool:
 
     def test_memory_validation(self):
         query_engine = VectorQueryEngine(
-            vector_store_driver=LocalVectorStoreDriver(
-                embedding_driver=MockEmbeddingDriver()
-            )
+            vector_store_driver=LocalVectorStoreDriver(embedding_driver=MockEmbeddingDriver())
         )
 
         with pytest.raises(ValueError):
@@ -87,41 +76,24 @@ class TestBaseTool:
                 output_memory={
                     "test": [
                         TextToolMemory(name="Memory1", query_engine=query_engine),
-                        TextToolMemory(name="Memory1", query_engine=query_engine)
+                        TextToolMemory(name="Memory1", query_engine=query_engine),
                     ]
                 }
             )
 
         with pytest.raises(ValueError):
-            MockTool(
-                output_memory={
-                    "output_memory": [
-                        TextToolMemory(name="Memory1", query_engine=query_engine)
-                    ]
-                }
-            )
+            MockTool(output_memory={"output_memory": [TextToolMemory(name="Memory1", query_engine=query_engine)]})
 
         assert MockTool(
-                output_memory={
-                    "test": [
-                        TextToolMemory(
-                            name="Memory1", query_engine=query_engine
-                        )
-                    ],
-                    "test_str_output": [
-                        TextToolMemory(
-                            name="Memory1", query_engine=query_engine
-                        )
-                    ]
-                }
-            )
+            output_memory={
+                "test": [TextToolMemory(name="Memory1", query_engine=query_engine)],
+                "test_str_output": [TextToolMemory(name="Memory1", query_engine=query_engine)],
+            }
+        )
 
     def test_find_input_memory(self):
         assert MockTool().find_input_memory("foo") is None
         assert MockTool(input_memory=[TextToolMemory(name="foo")]).find_input_memory("foo") is not None
 
     def test_execute(self, tool):
-        assert tool.execute(
-            tool.test_list_output,
-            ActionSubtask("foo")
-        ).value == "foo\nbar"
+        assert tool.execute(tool.test_list_output, ActionSubtask("foo")).value == "foo\nbar"

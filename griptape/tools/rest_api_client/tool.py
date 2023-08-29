@@ -93,9 +93,7 @@ class RestApiClient(BaseTool):
             ),
             "schema": Schema(
                 {
-                    Literal(
-                        "path_params", description="The request path parameters."
-                    ): list,
+                    Literal("path_params", description="The request path parameters."): list,
                     Literal("body", description="The request body."): dict,
                 }
             ),
@@ -218,11 +216,7 @@ class RestApiClient(BaseTool):
                             description="The request query parameters.",
                         )
                     ): dict,
-                    schema.Optional(
-                        Literal(
-                            "path_params", description="The request path parameters."
-                        )
-                    ): list,
+                    schema.Optional(Literal("path_params", description="The request path parameters.")): list,
                 }
             ),
         }

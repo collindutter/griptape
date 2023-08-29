@@ -89,7 +89,10 @@ class BaseTool(ActivityMixin, ABC):
         return self.after_execute(activity, subtask, result)
 
     def after_execute(
-            self, activity: callable, subtask: ActionSubtask, value: Union[BaseArtifact, list[BaseArtifact]]
+        self,
+        activity: callable,
+        subtask: ActionSubtask,
+        value: Union[BaseArtifact, list[BaseArtifact]],
     ) -> BaseArtifact:
         if self.output_memory:
             for memory in activity.__self__.output_memory.get(activity.name, []):
@@ -109,7 +112,9 @@ class BaseTool(ActivityMixin, ABC):
                     return value[0]
                 else:
                     return reduce(
-                        lambda a, b: TextArtifact(f"{a.to_text()}\n{b.to_text()}"), value[1:], value[0]
+                        lambda a, b: TextArtifact(f"{a.to_text()}\n{b.to_text()}"),
+                        value[1:],
+                        value[0],
                     )
             else:
                 return TextArtifact(str(value))
@@ -135,14 +140,7 @@ class BaseTool(ActivityMixin, ABC):
     def install_dependencies(self, env: Optional[dict[str, str]] = None) -> None:
         env = env if env else {}
 
-        command = [
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "-r",
-            "requirements.txt"
-        ]
+        command = [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
 
         if self.dependencies_install_directory is None:
             command.extend(["-U"])
@@ -154,7 +152,7 @@ class BaseTool(ActivityMixin, ABC):
             env=env,
             cwd=self.tool_dir(),
             stdout=None if self.verbose else subprocess.DEVNULL,
-            stderr=None if self.verbose else subprocess.DEVNULL
+            stderr=None if self.verbose else subprocess.DEVNULL,
         )
 
     def find_input_memory(self, memory_name: str) -> Optional[BaseToolMemory]:

@@ -5,14 +5,13 @@ from griptape.drivers import RedisVectorStoreDriver
 
 
 class TestRedisVectorStorageDriver:
-
     @pytest.fixture(autouse=True)
     def mock_redis(self, mocker):
         # Create a fake hgetall response for our mock Redis client
         fake_hgetall_response = {
-            b"vector": b'\x00\x00\x80?\x00\x00\x00@\x00\x00@@',
-            b"vec_string": b'[1.0, 2.0, 3.0]',
-            b"metadata": b'{"foo": "bar"}'
+            b"vector": b"\x00\x00\x80?\x00\x00\x00@\x00\x00@@",
+            b"vec_string": b"[1.0, 2.0, 3.0]",
+            b"metadata": b'{"foo": "bar"}',
         }
 
         # Mock Redis methods that our driver will call
@@ -21,8 +20,11 @@ class TestRedisVectorStorageDriver:
         mocker.patch.object(redis.StrictRedis, "keys", return_value=[b"some_namespace:some_vector_id"])
 
         # If the ft method is being used, mock it directly, but avoid using autospec on the whole Redis object.
-        mocker.patch.object(redis.StrictRedis, "ft", return_value=mocker.MagicMock(
-            search=mocker.MagicMock(return_value=mocker.MagicMock(docs=[]))))
+        mocker.patch.object(
+            redis.StrictRedis,
+            "ft",
+            return_value=mocker.MagicMock(search=mocker.MagicMock(return_value=mocker.MagicMock(docs=[]))),
+        )
 
     @pytest.fixture
     def driver(self):
@@ -31,7 +33,7 @@ class TestRedisVectorStorageDriver:
             port=6379,
             index="test_index",
             db=0,
-            embedding_driver=MockEmbeddingDriver()
+            embedding_driver=MockEmbeddingDriver(),
         )
 
     def test_upsert_vector(self, driver):

@@ -17,6 +17,7 @@ class TextGenPromptDriver(BasePromptDriver):
     params usage example:
     https://github.com/oobabooga/text-generation-webui/blob/main/api-examples/api-example.py
     """
+
     preset: Optional[str] = field(default=None, kw_only=True)
     params: dict = field(factory=dict, kw_only=True)
 

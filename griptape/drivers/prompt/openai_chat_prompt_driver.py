@@ -18,7 +18,7 @@ class OpenAiChatPromptDriver(BasePromptDriver):
     model: str = field(default=TiktokenTokenizer.DEFAULT_OPENAI_GPT_3_CHAT_MODEL, kw_only=True)
     tokenizer: TiktokenTokenizer = field(
         default=Factory(lambda self: TiktokenTokenizer(model=self.model), takes_self=True),
-        kw_only=True
+        kw_only=True,
     )
     user: str = field(default="", kw_only=True)
 
@@ -26,16 +26,12 @@ class OpenAiChatPromptDriver(BasePromptDriver):
         result = openai.ChatCompletion.create(**self._base_params(prompt_stack))
 
         if len(result.choices) == 1:
-            return TextArtifact(
-                value=result.choices[0]["message"]["content"].strip()
-            )
+            return TextArtifact(value=result.choices[0]["message"]["content"].strip())
         else:
             raise Exception("Completion with more than one choice is not supported yet.")
 
     def token_count(self, prompt_stack: PromptStack) -> int:
-        return self.tokenizer.token_count(
-            self._prompt_stack_to_messages(prompt_stack)
-        )
+        return self.tokenizer.token_count(self._prompt_stack_to_messages(prompt_stack))
 
     def max_output_tokens(self, messages: list) -> int:
         if self.max_tokens:
@@ -44,12 +40,7 @@ class OpenAiChatPromptDriver(BasePromptDriver):
             return self.tokenizer.tokens_left(messages)
 
     def _prompt_stack_to_messages(self, prompt_stack: PromptStack) -> list[dict]:
-        return [
-            {
-                "role": self.__to_openai_role(i),
-                "content": i.content
-            } for i in prompt_stack.inputs
-        ]
+        return [{"role": self.__to_openai_role(i), "content": i.content} for i in prompt_stack.inputs]
 
     def _base_params(self, prompt_stack: PromptStack) -> dict:
         messages = self._prompt_stack_to_messages(prompt_stack)
@@ -65,7 +56,7 @@ class OpenAiChatPromptDriver(BasePromptDriver):
             "api_version": self.api_version,
             "api_base": self.api_base,
             "api_type": self.api_type,
-            "messages": messages
+            "messages": messages,
         }
 
     def __to_openai_role(self, prompt_input: PromptStack.Input) -> str:

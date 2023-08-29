@@ -14,5 +14,5 @@ __all__ = [
     "BaseSummaryEngine",
     "PromptSummaryEngine",
     "BaseExtractionEngine",
-    "CsvExtractionEngine"
+    "CsvExtractionEngine",
 ]

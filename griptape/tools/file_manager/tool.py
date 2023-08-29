@@ -11,15 +11,19 @@ from schema import Schema, Literal
 class FileManager(BaseTool):
     dir: str = field(default=os.getcwd(), kw_only=True)
 
-    @activity(config={
-        "description": "Can be used to load files from disk",
-        "schema": Schema({
-            Literal(
-                "paths",
-                description="Paths to files to be loaded in the POSIX format. For example, ['foo/bar/file.txt']"
-            ): []
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to load files from disk",
+            "schema": Schema(
+                {
+                    Literal(
+                        "paths",
+                        description="Paths to files to be loaded in the POSIX format. For example, ['foo/bar/file.txt']",
+                    ): []
+                }
+            ),
+        }
+    )
     def load_files_from_disk(self, params: dict) -> list[BlobArtifact] | ErrorArtifact:
         artifact_list = []
 
@@ -30,13 +34,7 @@ class FileManager(BaseTool):
 
             try:
                 with open(full_path, "rb") as file:
-                    artifact_list.append(
-                        BlobArtifact(
-                            file.read(),
-                            name=file_name,
-                            dir=dir_name
-                        )
-                    )
+                    artifact_list.append(BlobArtifact(file.read(), name=file_name, dir=dir_name))
             except FileNotFoundError:
                 return ErrorArtifact(f"file {file_name} not found")
             except Exception as e:
@@ -44,17 +42,21 @@ class FileManager(BaseTool):
 
         return artifact_list
 
-    @activity(config={
-        "description": "Can be used to save an artifact namespace to disk",
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str,
-            Literal(
-                "path",
-                description="Destination path on disk in the POSIX format. For example, ['foo/bar/file.txt']"
-            ): str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to save an artifact namespace to disk",
+            "schema": Schema(
+                {
+                    "memory_name": str,
+                    "artifact_namespace": str,
+                    Literal(
+                        "path",
+                        description="Destination path on disk in the POSIX format. For example, ['foo/bar/file.txt']",
+                    ): str,
+                }
+            ),
+        }
+    )
     def save_file_to_disk(self, params: dict) -> ErrorArtifact | InfoArtifact:
         artifact_namespace = params["values"]["artifact_namespace"]
         new_path = params["values"]["path"]
@@ -76,7 +78,7 @@ class FileManager(BaseTool):
 
                         file.write(value.encode() if isinstance(value, str) else value)
 
-                        return InfoArtifact(f"saved successfully")
+                        return InfoArtifact("saved successfully")
                 except Exception as e:
                     return ErrorArtifact(f"error writing file to disk: {e}")
         else:

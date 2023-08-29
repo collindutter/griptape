@@ -11,9 +11,7 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
     api_key: str = field(kw_only=True)
     url: str = field(kw_only=True)
     mq: marqo.Client = field(
-        default=Factory(
-            lambda self: marqo.Client(self.url, self.api_key), takes_self=True
-        ),
+        default=Factory(lambda self: marqo.Client(self.url, self.api_key), takes_self=True),
         kw_only=True,
     )
     index: str = field(kw_only=True)
@@ -37,12 +35,12 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
         self.index = index
 
     def upsert_text(
-            self,
-            string: str,
-            vector_id: Optional[str] = None,
-            namespace: Optional[str] = None,
-            meta: Optional[dict] = None,
-            **kwargs
+        self,
+        string: str,
+        vector_id: Optional[str] = None,
+        namespace: Optional[str] = None,
+        meta: Optional[dict] = None,
+        **kwargs,
     ) -> str:
         """Upsert a text document into the Marqo index.
 
@@ -65,17 +63,17 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
         if meta:
             doc["meta"] = str(meta)
         if namespace:
-            doc['namespace'] = namespace
+            doc["namespace"] = namespace
 
         response = self.mq.index(self.index).add_documents([doc], tensor_fields=["Description"])
         return response["items"][0]["_id"]
 
     def upsert_text_artifact(
-            self,
-            artifact: TextArtifact,
-            namespace: Optional[str] = None,
-            meta: Optional[dict] = None,
-            **kwargs
+        self,
+        artifact: TextArtifact,
+        namespace: Optional[str] = None,
+        meta: Optional[dict] = None,
+        **kwargs,
     ) -> str:
         """Upsert a text artifact into the Marqo index.
 
@@ -94,7 +92,7 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
             "_id": artifact.id,
             "Description": artifact.value,  # Description will be treated as tensor field
             "artifact": str(artifact_json),
-            "namespace": namespace
+            "namespace": namespace,
         }
 
         response = self.mq.index(self.index).add_documents([doc], tensor_fields=["Description", "artifact"])
@@ -142,8 +140,8 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
 
         # for each document, if it's found, create an Entry object
         entries = []
-        for doc in documents['results']:
-            if doc['_found']:
+        for doc in documents["results"]:
+            if doc["_found"]:
                 entries.append(
                     BaseVectorStoreDriver.Entry(
                         id=doc["_id"],
@@ -156,13 +154,13 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
         return entries
 
     def query(
-            self,
-            query: str,
-            count: Optional[int] = None,
-            namespace: Optional[str] = None,
-            include_vectors: bool = False,
-            include_metadata=True,
-            **kwargs
+        self,
+        query: str,
+        count: Optional[int] = None,
+        namespace: Optional[str] = None,
+        include_vectors: bool = False,
+        include_metadata=True,
+        **kwargs,
     ) -> list[BaseVectorStoreDriver.QueryResult]:
         """Query the Marqo index for documents.
 
@@ -178,16 +176,22 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
         """
 
         params = {
-                     "limit": count if count else BaseVectorStoreDriver.DEFAULT_QUERY_COUNT,
-                     "attributes_to_retrieve": ["*"] if include_metadata else ["_id"],
-                     "filter_string": f"namespace:{namespace}" if namespace else None
-                 } | kwargs
+            "limit": count if count else BaseVectorStoreDriver.DEFAULT_QUERY_COUNT,
+            "attributes_to_retrieve": ["*"] if include_metadata else ["_id"],
+            "filter_string": f"namespace:{namespace}" if namespace else None,
+        } | kwargs
 
         results = self.mq.index(self.index).search(query, **params)
 
         if include_vectors:
-            results["hits"] = [ {**r, **self.mq.index(self.index).get_document(r["_id"], expose_facets=True)} for r in results["hits"] ]
-            
+            results["hits"] = [
+                {
+                    **r,
+                    **self.mq.index(self.index).get_document(r["_id"], expose_facets=True),
+                }
+                for r in results["hits"]
+            ]
+
         return [
             BaseVectorStoreDriver.QueryResult(
                 vector=r["_tensor_facets"][0]["_embedding"] if include_vectors else [],
@@ -226,12 +230,12 @@ class MarqoVectorStoreDriver(BaseVectorStoreDriver):
         return [index.index_name for index in self.mq.get_indexes()["results"]]
 
     def upsert_vector(
-            self,
-            vector: list[float],
-            vector_id: Optional[str] = None,
-            namespace: Optional[str] = None,
-            meta: Optional[dict] = None,
-            **kwargs
+        self,
+        vector: list[float],
+        vector_id: Optional[str] = None,
+        namespace: Optional[str] = None,
+        meta: Optional[dict] = None,
+        **kwargs,
     ) -> str:
         """Upsert a vector into the Marqo index.
 

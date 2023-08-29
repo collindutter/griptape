@@ -18,13 +18,13 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
     tokenizer: Optional[BaseTokenizer] = field(default=None, kw_only=True)
     prompt_model_driver_class: Type[BasePromptModelDriver] = field(kw_only=True)
     prompt_model_driver: BasePromptModelDriver = field(
-        default=Factory(lambda self: self.prompt_model_driver_class(prompt_driver=self), takes_self=True),
-        kw_only=True
+        default=Factory(
+            lambda self: self.prompt_model_driver_class(prompt_driver=self),
+            takes_self=True,
+        ),
+        kw_only=True,
     )
-    session: boto3.Session = field(
-        default=Factory(lambda: boto3.Session()),
-        kw_only=True
-    )
+    session: boto3.Session = field(default=Factory(lambda: boto3.Session()), kw_only=True)
     sagemaker_client: boto3.client = field(
         default=Factory(
             lambda self: self.session.client("sagemaker-runtime"),
@@ -32,10 +32,7 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
         ),
         kw_only=True,
     )
-    custom_attributes: str = field(
-        default="accept_eula=true",
-        kw_only=True
-    )
+    custom_attributes: str = field(default="accept_eula=true", kw_only=True)
 
     def __attrs_post_init__(self) -> None:
         if not self.tokenizer:
@@ -44,7 +41,7 @@ class AmazonSagemakerPromptDriver(BasePromptDriver):
     def try_run(self, prompt_stack: PromptStack) -> TextArtifact:
         payload = {
             "inputs": self.prompt_model_driver.prompt_stack_to_model_input(prompt_stack),
-            "parameters": self.prompt_model_driver.model_params(prompt_stack)
+            "parameters": self.prompt_model_driver.model_params(prompt_stack),
         }
         response = self.sagemaker_client.invoke_endpoint(
             EndpointName=self.model,

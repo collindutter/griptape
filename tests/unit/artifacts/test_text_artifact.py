@@ -13,7 +13,10 @@ class TestTextArtifact:
         assert (TextArtifact("foo") + TextArtifact("bar")).value == "foobar"
 
     def test_generate_embedding(self):
-        assert TextArtifact("foobar").generate_embedding(MockEmbeddingDriver()) == [0, 1]
+        assert TextArtifact("foobar").generate_embedding(MockEmbeddingDriver()) == [
+            0,
+            1,
+        ]
 
     def test_embedding(self):
         artifact = TextArtifact("foobar")

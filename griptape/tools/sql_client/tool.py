@@ -26,12 +26,12 @@ class SqlClient(BaseTool):
             "engine": self.engine_name,
             "table_name": self.full_table_name,
             "table_description": self.table_description,
-            "table_schema": self.sql_loader.sql_driver.get_table_schema(self.table_name, schema=self.schema_name)
+            "table_schema": self.sql_loader.sql_driver.get_table_schema(self.table_name, schema=self.schema_name),
         }
 
-    @activity(config={
-        "description":
-            "Can be used to execute{% if engine %} {{ engine }}{% endif %} SQL SELECT queries "
+    @activity(
+        config={
+            "description": "Can be used to execute{% if engine %} {{ engine }}{% endif %} SQL SELECT queries "
             "in table {{ table_name }}. "
             "Make sure the `SELECT` statement contains enough columns to get an answer without knowing "
             "the original question. "
@@ -40,10 +40,9 @@ class SqlClient(BaseTool):
             "You can use JOINs if more tables are available in other tools.\n"
             "{{ table_name }} schema: {{ table_schema }}{% if table_description %}\n"
             "{{ table_name }} description: {{ table_description }}{% endif %}",
-        "schema": Schema({
-            "sql_query": str
-        })
-    })
+            "schema": Schema({"sql_query": str}),
+        }
+    )
     def execute_query(self, params: dict) -> list[CsvRowArtifact] | InfoArtifact:
         query = params["values"]["sql_query"]
         rows = self.sql_loader.load(query)

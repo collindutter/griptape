@@ -1,7 +1,10 @@
 import boto3
 import pytest
 from griptape.utils import PromptStack
-from griptape.drivers import AmazonSagemakerPromptDriver, SagemakerFalconPromptModelDriver
+from griptape.drivers import (
+    AmazonSagemakerPromptDriver,
+    SagemakerFalconPromptModelDriver,
+)
 from griptape.tokenizers import TiktokenTokenizer
 
 
@@ -13,7 +16,7 @@ class TestSagemakerFalconPromptModelDriver:
             session=boto3.Session(region_name="us-east-1"),
             tokenizer=TiktokenTokenizer(),
             prompt_model_driver_class=SagemakerFalconPromptModelDriver,
-            temperature=0.12345
+            temperature=0.12345,
         ).prompt_model_driver
 
     @pytest.fixture
@@ -36,6 +39,4 @@ class TestSagemakerFalconPromptModelDriver:
         assert driver.model_params(stack)["temperature"] == 0.12345
 
     def test_process_output(self, driver, stack):
-        assert driver.process_output([
-            {"generated_text": "foobar"}
-        ]).value == "foobar"
+        assert driver.process_output([{"generated_text": "foobar"}]).value == "foobar"

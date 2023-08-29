@@ -18,23 +18,15 @@ class PromptTask(BaseTask):
     context: dict[str, any] = field(factory=dict, kw_only=True)
     prompt_driver: Optional[BasePromptDriver] = field(default=None, kw_only=True)
     generate_system_template: Callable[[PromptTask], str] = field(
-        default=Factory(
-            lambda self: self.default_system_template_generator,
-            takes_self=True
-        ),
-        kw_only=True
+        default=Factory(lambda self: self.default_system_template_generator, takes_self=True),
+        kw_only=True,
     )
 
     output: Optional[Union[TextArtifact, ErrorArtifact, InfoArtifact]] = field(default=None, init=False)
 
     @property
     def input(self) -> TextArtifact:
-        return TextArtifact(
-            J2().render_from_string(
-                self.input_template,
-                **self.full_context
-            )
-        )
+        return TextArtifact(J2().render_from_string(self.input_template, **self.full_context))
 
     @property
     def full_context(self) -> dict[str, any]:
@@ -49,9 +41,7 @@ class PromptTask(BaseTask):
         stack = PromptStack()
         memory = self.structure.memory
 
-        stack.add_system_input(
-            self.generate_system_template(self)
-        )
+        stack.add_system_input(self.generate_system_template(self))
 
         if memory:
             memory.add_to_prompt_stack(stack)
@@ -64,9 +54,7 @@ class PromptTask(BaseTask):
         return stack
 
     def default_system_template_generator(self, _: PromptTask) -> str:
-        return J2("tasks/prompt_task/system.j2").render(
-            rulesets=self.structure.rulesets
-        )
+        return J2("tasks/prompt_task/system.j2").render(rulesets=self.structure.rulesets)
 
     def before_run(self) -> None:
         super().before_run()

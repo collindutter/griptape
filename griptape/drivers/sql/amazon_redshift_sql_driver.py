@@ -15,31 +15,23 @@ class AmazonRedshiftSqlDriver(BaseSqlDriver):
     database_credentials_secret_arn: Optional[str] = field(default=None, kw_only=True)
     wait_for_query_completion_sec: float = field(default=0.3, kw_only=True)
     client: boto3.client = field(
-        default=Factory(
-            lambda self: self.session.client("redshift-data"), takes_self=True
-        ),
+        default=Factory(lambda self: self.session.client("redshift-data"), takes_self=True),
         kw_only=True,
     )
 
     @workgroup_name.validator
     def validate_params(self, _, workgroup_name: Optional[str]) -> None:
         if not self.cluster_identifier and not self.workgroup_name:
-            raise ValueError(
-                "Provide a value for one of `cluster_identifier` or `workgroup_name`"
-            )
+            raise ValueError("Provide a value for one of `cluster_identifier` or `workgroup_name`")
         elif self.cluster_identifier and self.workgroup_name:
-            raise ValueError(
-                "Provide a value for either `cluster_identifier` or `workgroup_name`, but not both"
-            )
+            raise ValueError("Provide a value for either `cluster_identifier` or `workgroup_name`, but not both")
 
     @classmethod
     def _process_rows_from_records(cls, records) -> list[list]:
         return [[c[list(c.keys())[0]] for c in r] for r in records]
 
     @classmethod
-    def _process_cells_from_rows_and_columns(
-        cls, columns: list, rows: list[list]
-    ) -> list[dict[str, any]]:
+    def _process_cells_from_rows_and_columns(cls, columns: list, rows: list[list]) -> list[dict[str, any]]:
         return [{column: r[idx] for idx, column in enumerate(columns)} for r in rows]
 
     @classmethod
@@ -94,9 +86,7 @@ class AmazonRedshiftSqlDriver(BaseSqlDriver):
         elif statement["Status"] in ["FAILED", "ABORTED"]:
             return None
 
-    def get_table_schema(
-        self, table: str, schema: Optional[str] = None
-    ) -> Optional[str]:
+    def get_table_schema(self, table: str, schema: Optional[str] = None) -> Optional[str]:
         function_kwargs = {"Database": self.database, "Table": table}
         if schema:
             function_kwargs["Schema"] = schema

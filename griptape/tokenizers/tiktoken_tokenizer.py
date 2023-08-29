@@ -25,13 +25,10 @@ class TiktokenTokenizer(BaseTokenizer):
         "text-davinci-002": 4097,
         "code-davinci-002": 8001,
         "text-embedding-ada-002": 8191,
-        "text-embedding-ada-001": 2046
+        "text-embedding-ada-001": 2046,
     }
 
-    EMBEDDING_MODELS = [
-        "text-embedding-ada-002",
-        "text-embedding-ada-001"
-    ]
+    EMBEDDING_MODELS = ["text-embedding-ada-002", "text-embedding-ada-001"]
 
     model: str = field(default=DEFAULT_OPENAI_GPT_3_CHAT_MODEL, kw_only=True)
 

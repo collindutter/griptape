@@ -10,20 +10,18 @@ class MongoDbAtlasVectorStoreDriver(BaseVectorStoreDriver):
     connection_string: str = field(kw_only=True)
     database_name: str = field(kw_only=True)
     collection_name: str = field(kw_only=True)
-    client: MongoClient = field(
-        default=Factory(lambda self: MongoClient(self.connection_string), takes_self=True)
-    )
+    client: MongoClient = field(default=Factory(lambda self: MongoClient(self.connection_string), takes_self=True))
 
     def get_collection(self) -> Collection:
         return self.client[self.database_name][self.collection_name]
 
     def upsert_vector(
-            self,
-            vector: list[float],
-            vector_id: Optional[str] = None,
-            namespace: Optional[str] = None,
-            meta: Optional[dict] = None,
-            **kwargs
+        self,
+        vector: list[float],
+        vector_id: Optional[str] = None,
+        namespace: Optional[str] = None,
+        meta: Optional[dict] = None,
+        **kwargs
     ) -> str:
         collection = self.get_collection()
 
@@ -48,9 +46,7 @@ class MongoDbAtlasVectorStoreDriver(BaseVectorStoreDriver):
             )
         return vector_id
 
-    def load_entry(
-            self, vector_id: str, namespace: Optional[str] = None
-    ) -> Optional[BaseVectorStoreDriver.Entry]:
+    def load_entry(self, vector_id: str, namespace: Optional[str] = None) -> Optional[BaseVectorStoreDriver.Entry]:
         collection = self.get_collection()
         doc = collection.find_one({"_id": vector_id})
         if doc is None:
@@ -62,9 +58,7 @@ class MongoDbAtlasVectorStoreDriver(BaseVectorStoreDriver):
             meta=doc["meta"],
         )
 
-    def load_entries(
-            self, namespace: Optional[str] = None
-    ) -> list[BaseVectorStoreDriver.Entry]:
+    def load_entries(self, namespace: Optional[str] = None) -> list[BaseVectorStoreDriver.Entry]:
         collection = self.get_collection()
         if namespace is None:
             cursor = collection.find()
@@ -80,14 +74,14 @@ class MongoDbAtlasVectorStoreDriver(BaseVectorStoreDriver):
             )
 
     def query(
-            self,
-            query: str,
-            count: Optional[int] = None,
-            namespace: Optional[str] = None,
-            include_vectors: bool = False,
-            offset: Optional[int] = 0,
-            index: Optional[str] = None,
-            **kwargs
+        self,
+        query: str,
+        count: Optional[int] = None,
+        namespace: Optional[str] = None,
+        include_vectors: bool = False,
+        offset: Optional[int] = 0,
+        index: Optional[str] = None,
+        **kwargs
     ) -> list[BaseVectorStoreDriver.QueryResult]:
         collection = self.get_collection()
 
@@ -96,26 +90,18 @@ class MongoDbAtlasVectorStoreDriver(BaseVectorStoreDriver):
 
         knn_k = count if count else 10
         pipeline = [
-            {
-                "$search": {
-                    "knnBeta": {
-                        "vector": vector,
-                        "path": "vector",
-                        "k": knn_k + offset
-                    }
-                }
-            },
+            {"$search": {"knnBeta": {"vector": vector, "path": "vector", "k": knn_k + offset}}},
             {
                 "$project": {
                     "_id": 1,
                     "vector": 1,
                     "namespace": 1,
                     "meta": 1,
-                    "score": {"$meta": "searchScore"}  # Include the score in the projection
+                    "score": {"$meta": "searchScore"},  # Include the score in the projection
                 }
             },
             {"$skip": offset},
-            {"$limit": knn_k}
+            {"$limit": knn_k},
         ]
 
         if index:

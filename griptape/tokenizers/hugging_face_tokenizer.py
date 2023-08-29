@@ -12,7 +12,7 @@ class HuggingFaceTokenizer(BaseTokenizer):
     tokenizer: PreTrainedTokenizerBase = field(kw_only=True)
     max_tokens: int = field(
         default=Factory(lambda self: self.tokenizer.model_max_length, takes_self=True),
-        kw_only=True
+        kw_only=True,
     )
 
     def encode(self, text: str) -> list[int]:

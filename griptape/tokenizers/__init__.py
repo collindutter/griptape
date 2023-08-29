@@ -12,5 +12,5 @@ __all__ = [
     "CohereTokenizer",
     "HuggingFaceTokenizer",
     "AnthropicTokenizer",
-    "TextGenTokenizer"
+    "TextGenTokenizer",
 ]

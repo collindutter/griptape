@@ -15,8 +15,8 @@ class TestWorkflow:
 
         assert workflow.prompt_driver is driver
         assert len(workflow.tasks) == 0
-        assert workflow.rulesets[0].name is "TestRuleset"
-        assert workflow.rulesets[0].rules[0].value is "test"
+        assert workflow.rulesets[0].name == "TestRuleset"
+        assert workflow.rulesets[0].rules[0].value == "test"
 
     def test_with_default_tool_memory(self):
         workflow = Workflow()
@@ -53,9 +53,7 @@ class TestWorkflow:
         first_task = PromptTask("test1")
         second_task = PromptTask("test2")
 
-        workflow = Workflow(
-            prompt_driver=MockPromptDriver()
-        )
+        workflow = Workflow(prompt_driver=MockPromptDriver())
 
         workflow + first_task
         workflow + second_task
@@ -74,9 +72,7 @@ class TestWorkflow:
         first_task = PromptTask("test1")
         second_task = PromptTask("test2")
 
-        workflow = Workflow(
-            prompt_driver=MockPromptDriver()
-        )
+        workflow = Workflow(prompt_driver=MockPromptDriver())
 
         workflow + [first_task, second_task]
 

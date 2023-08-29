@@ -17,33 +17,27 @@ class TestTiktokenTokenizer:
         assert tokenizer.token_count("foo bar huzzah") == 5
 
     def test_token_count_for_messages(self, tokenizer):
-        assert tokenizer.token_count(
-            [
-                {
-                    "role": "system",
-                    "content": "foobar baz"
-                },
-                {
-                    "role": "user",
-                    "content": "how foobar am I?"
-                }
-            ],
-            model="gpt-4"
-        ) == 19
+        assert (
+            tokenizer.token_count(
+                [
+                    {"role": "system", "content": "foobar baz"},
+                    {"role": "user", "content": "how foobar am I?"},
+                ],
+                model="gpt-4",
+            )
+            == 19
+        )
 
-        assert tokenizer.token_count(
-            [
-                {
-                    "role": "system",
-                    "content": "foobar baz"
-                },
-                {
-                    "role": "user",
-                    "content": "how foobar am I?"
-                }
-            ],
-            model="gpt-3.5-turbo-0301"
-        ) == 21
+        assert (
+            tokenizer.token_count(
+                [
+                    {"role": "system", "content": "foobar baz"},
+                    {"role": "user", "content": "how foobar am I?"},
+                ],
+                model="gpt-3.5-turbo-0301",
+            )
+            == 21
+        )
 
     def test_tokens_left(self, tokenizer):
         assert tokenizer.tokens_left("foo bar huzzah") == 4083

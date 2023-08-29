@@ -37,5 +37,5 @@ __all__ = [
     "DateTime",
     "ToolOutputProcessor",
     "Computer",
-    "ProxycurlClient"
+    "ProxycurlClient",
 ]

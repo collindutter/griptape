@@ -1,5 +1,4 @@
 import json
-from .paths import abs_path
 from .hash import str_to_hash
 from .j2 import J2
 from .conversation import Conversation
@@ -15,7 +14,7 @@ from .prompt_stack import PromptStack
 
 
 def minify_json(value: str) -> str:
-    return json.dumps(json.loads(value), separators=(',', ':'))
+    return json.dumps(json.loads(value), separators=(",", ":"))
 
 
 __all__ = [
@@ -31,5 +30,5 @@ __all__ = [
     "TokenCounter",
     "ActivityMixin",
     "ExponentialBackoffMixin",
-    "PromptStack"
+    "PromptStack",
 ]

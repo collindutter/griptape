@@ -39,7 +39,7 @@ class SqlDriver(BaseSqlDriver):
                 MetaData(bind=self.engine),
                 schema=schema,
                 autoload=True,
-                autoload_with=self.engine
+                autoload_with=self.engine,
             )
             return str([(c.name, c.type) for c in table.columns])
         except sqlalchemy.exc.NoSuchTableError:

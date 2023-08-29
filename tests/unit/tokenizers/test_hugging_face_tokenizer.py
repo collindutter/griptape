@@ -10,9 +10,7 @@ from griptape.tokenizers import HuggingFaceTokenizer
 class TestHuggingFaceTokenizer:
     @pytest.fixture
     def tokenizer(self):
-        return HuggingFaceTokenizer(
-            tokenizer=GPT2Tokenizer.from_pretrained("gpt2")
-        )
+        return HuggingFaceTokenizer(tokenizer=GPT2Tokenizer.from_pretrained("gpt2"))
 
     def test_encode(self, tokenizer):
         assert tokenizer.encode("foo bar") == [21943, 2318]

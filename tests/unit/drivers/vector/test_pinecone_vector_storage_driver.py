@@ -14,16 +14,8 @@ class TestPineconeVectorStorageDriver:
     def mock_pinecone(self, mocker):
         # Create a fake response
         fake_query_response = {
-            "matches": [
-                {
-                    "values": [0, 1, 0],
-                    "score": 42,
-                    "metadata": {
-                        "foo": "bar"
-                    }
-                }
-            ],
-            "namespace": "foobar"
+            "matches": [{"values": [0, 1, 0], "score": 42, "metadata": {"foo": "bar"}}],
+            "namespace": "foobar",
         }
 
         mocker.patch("pinecone.init", return_value=None)
@@ -37,7 +29,7 @@ class TestPineconeVectorStorageDriver:
             api_key="foobar",
             index_name="test",
             environment="test",
-            embedding_driver=MockEmbeddingDriver()
+            embedding_driver=MockEmbeddingDriver(),
         )
 
     def test_upsert_text_artifact(self, driver):

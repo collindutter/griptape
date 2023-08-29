@@ -9,10 +9,7 @@ from tests.mocks.mock_tool.tool import MockTool
 class TestBlobToolMemory:
     @pytest.fixture
     def memory(self):
-        return BlobToolMemory(
-            name="MyMemory",
-            driver=LocalBlobToolMemoryDriver()
-        )
+        return BlobToolMemory(name="MyMemory", driver=LocalBlobToolMemoryDriver())
 
     def test_init(self, memory):
         assert memory.name == "MyMemory"
@@ -26,22 +23,23 @@ class TestBlobToolMemory:
         subtask = ActionSubtask()
         output = memory.process_output(MockTool().test, subtask, artifact)
 
-        assert output.to_text().startswith(
-            'Output of "MockTool.test" was stored in memory'
-        )
+        assert output.to_text().startswith('Output of "MockTool.test" was stored in memory')
         assert memory.namespace_metadata[artifact.id] == subtask.action_to_json()
 
         assert memory.driver.load(artifact.id) == [artifact]
 
     def test_process_output_with_many_artifacts(self, memory):
-        assert memory.process_output(
-            MockTool().test, ActionSubtask(), [BlobArtifact(b"foo", name="foo")]
-        ).to_text().startswith(
-            'Output of "MockTool.test" was stored in memory'
+        assert (
+            memory.process_output(MockTool().test, ActionSubtask(), [BlobArtifact(b"foo", name="foo")])
+            .to_text()
+            .startswith('Output of "MockTool.test" was stored in memory')
         )
 
     def test_load_artifacts(self, memory):
-        for a in [BlobArtifact(b"foo", name="fooname"), BlobArtifact(b"bar", name="barname")]:
+        for a in [
+            BlobArtifact(b"foo", name="fooname"),
+            BlobArtifact(b"bar", name="barname"),
+        ]:
             memory.driver.save("test", a)
 
         assert len(memory.load_artifacts("test")) == 2

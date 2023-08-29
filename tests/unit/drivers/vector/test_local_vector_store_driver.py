@@ -22,10 +22,7 @@ class TestLocalVectorStoreDriver:
         assert len(driver.entries) == 2
 
     def test_upsert_multiple(self, driver):
-        driver.upsert_text_artifacts({
-            "foo": [TextArtifact("foo")],
-            "bar": [TextArtifact("bar")]
-        })
+        driver.upsert_text_artifacts({"foo": [TextArtifact("foo")], "bar": [TextArtifact("bar")]})
 
         foo_entries = driver.load_entries("foo")
         bar_entries = driver.load_entries("bar")
@@ -48,10 +45,7 @@ class TestLocalVectorStoreDriver:
         assert BaseArtifact.from_json(driver.query("foobar")[0].meta["artifact"]).value == "foobar"
 
     def test_load_entry(self, driver):
-        vector_id = driver.upsert_text_artifact(
-            TextArtifact("foobar"),
-            namespace="test-namespace"
-        )
+        vector_id = driver.upsert_text_artifact(TextArtifact("foobar"), namespace="test-namespace")
 
         assert driver.load_entry(vector_id, namespace="test-namespace").id == vector_id
 

@@ -5,10 +5,4 @@ from .web_loader import WebLoader
 from .sql_loader import SqlLoader
 
 
-__all__ = [
-    "BaseLoader",
-    "TextLoader",
-    "PdfLoader",
-    "WebLoader",
-    "SqlLoader"
-]
+__all__ = ["BaseLoader", "TextLoader", "PdfLoader", "WebLoader", "SqlLoader"]

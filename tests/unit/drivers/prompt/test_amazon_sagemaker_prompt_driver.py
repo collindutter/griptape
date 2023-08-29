@@ -9,19 +9,25 @@ class TestAmazonSagemakerPromptDriver:
         assert AmazonSagemakerPromptDriver(
             model="foo",
             session=boto3.Session(region_name="us-east-1"),
-            prompt_model_driver_class=SagemakerLlamaPromptModelDriver
+            prompt_model_driver_class=SagemakerLlamaPromptModelDriver,
         )
 
     def test_custom_tokenizer(self):
-        assert isinstance(AmazonSagemakerPromptDriver(
-            model="foo",
-            session=boto3.Session(region_name="us-east-1"),
-            prompt_model_driver_class=SagemakerLlamaPromptModelDriver
-        ).tokenizer, HuggingFaceTokenizer)
+        assert isinstance(
+            AmazonSagemakerPromptDriver(
+                model="foo",
+                session=boto3.Session(region_name="us-east-1"),
+                prompt_model_driver_class=SagemakerLlamaPromptModelDriver,
+            ).tokenizer,
+            HuggingFaceTokenizer,
+        )
 
-        assert isinstance(AmazonSagemakerPromptDriver(
-            model="foo",
-            session=boto3.Session(region_name="us-east-1"),
-            tokenizer=TiktokenTokenizer(),
-            prompt_model_driver_class=SagemakerLlamaPromptModelDriver
-        ).tokenizer, TiktokenTokenizer)
+        assert isinstance(
+            AmazonSagemakerPromptDriver(
+                model="foo",
+                session=boto3.Session(region_name="us-east-1"),
+                tokenizer=TiktokenTokenizer(),
+                prompt_model_driver_class=SagemakerLlamaPromptModelDriver,
+            ).tokenizer,
+            TiktokenTokenizer,
+        )

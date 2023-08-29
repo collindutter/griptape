@@ -15,24 +15,16 @@ class ToolOutputProcessor(BaseTool):
     denylist: Optional[list[str]] = field(default=Factory(lambda: ["extract_csv"]), kw_only=True)
     # override parent
     input_memory: Optional[list[TextToolMemory]] = field(default=None, kw_only=True)
-    summary_engine: BaseSummaryEngine = field(
-        kw_only=True,
-        default=Factory(lambda: PromptSummaryEngine())
-    )
-    csv_extraction_engine: CsvExtractionEngine = field(
-        kw_only=True,
-        default=Factory(lambda: CsvExtractionEngine())
-    )
+    summary_engine: BaseSummaryEngine = field(kw_only=True, default=Factory(lambda: PromptSummaryEngine()))
+    csv_extraction_engine: CsvExtractionEngine = field(kw_only=True, default=Factory(lambda: CsvExtractionEngine()))
     top_n: int = field(default=5, kw_only=True)
 
-    @activity(config={
-        "description": "Can be used to insert text into a memory",
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str,
-            "text": str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to insert text into a memory",
+            "schema": Schema({"memory_name": str, "artifact_namespace": str, "text": str}),
+        }
+    )
     def insert(self, params: dict):
         memory = self.find_input_memory(params["values"]["memory_name"])
         artifact_namespace = params["values"]["artifact_namespace"]
@@ -45,39 +37,36 @@ class ToolOutputProcessor(BaseTool):
         else:
             return ErrorArtifact("memory not found")
 
-    @activity(config={
-        "description": "Can be used to extract and format content from memory into CSV output",
-        "uses_default_memory": False,
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str,
-            Literal(
-                "column_names",
-                description="Column names for the CSV file"
-            ): list[str]
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to extract and format content from memory into CSV output",
+            "uses_default_memory": False,
+            "schema": Schema(
+                {
+                    "memory_name": str,
+                    "artifact_namespace": str,
+                    Literal("column_names", description="Column names for the CSV file"): list[str],
+                }
+            ),
+        }
+    )
     def extract_csv(self, params: dict) -> list[BaseArtifact] | BaseArtifact:
         memory = self.find_input_memory(params["values"]["memory_name"])
         artifact_namespace = params["values"]["artifact_namespace"]
         column_names = params["values"]["column_names"]
 
         if memory:
-            return self.csv_extraction_engine.extract(
-                memory.load_artifacts(artifact_namespace),
-                column_names
-            )
+            return self.csv_extraction_engine.extract(memory.load_artifacts(artifact_namespace), column_names)
         else:
             return ErrorArtifact("memory not found")
 
-    @activity(config={
-        "description": "Can be used to summarize memory content",
-        "uses_default_memory": False,
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to summarize memory content",
+            "uses_default_memory": False,
+            "schema": Schema({"memory_name": str, "artifact_namespace": str}),
+        }
+    )
     def summarize(self, params: dict) -> TextArtifact | ErrorArtifact:
         memory = self.find_input_memory(params["values"]["memory_name"])
         artifact_namespace = params["values"]["artifact_namespace"]
@@ -89,19 +78,23 @@ class ToolOutputProcessor(BaseTool):
         else:
             return ErrorArtifact("memory not found")
 
-    @activity(config={
-        "description": "Can be used to search and query memory content",
-        "uses_default_memory": False,
-        "schema": Schema({
-            "memory_name": str,
-            "artifact_namespace": str,
-            Literal(
-                "query",
-                description="A natural language search query in the form of a question with enough "
-                            "contextual information for another person to understand what the query is about"
-            ): str
-        })
-    })
+    @activity(
+        config={
+            "description": "Can be used to search and query memory content",
+            "uses_default_memory": False,
+            "schema": Schema(
+                {
+                    "memory_name": str,
+                    "artifact_namespace": str,
+                    Literal(
+                        "query",
+                        description="A natural language search query in the form of a question with enough "
+                        "contextual information for another person to understand what the query is about",
+                    ): str,
+                }
+            ),
+        }
+    )
     def search(self, params: dict) -> TextArtifact | ErrorArtifact:
         memory = self.find_input_memory(params["values"]["memory_name"])
         artifact_namespace = params["values"]["artifact_namespace"]
@@ -112,13 +105,16 @@ class ToolOutputProcessor(BaseTool):
                 query,
                 top_n=self.top_n,
                 metadata=memory.namespace_metadata.get(artifact_namespace),
-                namespace=artifact_namespace
+                namespace=artifact_namespace,
             )
         else:
             return ErrorArtifact("memory not found")
 
     def find_input_memory(self, memory_name: str) -> Optional[TextToolMemory]:
         if self.input_memory:
-            return next((m for m in self.input_memory if isinstance(m, TextToolMemory) and m.name == memory_name), None)
+            return next(
+                (m for m in self.input_memory if isinstance(m, TextToolMemory) and m.name == memory_name),
+                None,
+            )
         else:
             return None

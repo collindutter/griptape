@@ -25,7 +25,7 @@ class TestLocalBlobToolMemoryDriver:
         artifact = BlobArtifact(b"foo", name="foo")
         driver.save("test", artifact)
 
-        driver.delete('test')
+        driver.delete("test")
 
         assert driver.load("test") == []
         assert driver.delete("test") is None

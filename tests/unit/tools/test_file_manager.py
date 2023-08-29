@@ -12,7 +12,7 @@ class TestFileManager:
     def test_load_files_from_disk(self):
         result = FileManager(
             input_memory=[TextToolMemory()],
-            dir=os.path.abspath(os.path.dirname(__file__))
+            dir=os.path.abspath(os.path.dirname(__file__)),
         ).load_files_from_disk({"values": {"paths": ["resources/bitcoin.pdf"]}})
 
         assert isinstance(result, list)
@@ -23,15 +23,22 @@ class TestFileManager:
         with tempfile.TemporaryDirectory() as temp_dir:
             memory = TextToolMemory(
                 query_engine=VectorQueryEngine(
-                    vector_store_driver=LocalVectorStoreDriver(
-                        embedding_driver=MockEmbeddingDriver())))
+                    vector_store_driver=LocalVectorStoreDriver(embedding_driver=MockEmbeddingDriver())
+                )
+            )
             artifact = TextArtifact("foobar")
             path = os.path.join(temp_dir, "foobar.txt")
 
             memory.query_engine.vector_store_driver.upsert_text_artifact(artifact, namespace="foobar")
 
-            result = FileManager(
-                input_memory=[memory]
-            ).save_file_to_disk({"values": {"path": path, "memory_name": memory.name, "artifact_namespace": "foobar"}})
+            result = FileManager(input_memory=[memory]).save_file_to_disk(
+                {
+                    "values": {
+                        "path": path,
+                        "memory_name": memory.name,
+                        "artifact_namespace": "foobar",
+                    }
+                }
+            )
 
             assert result.value == "saved successfully"
